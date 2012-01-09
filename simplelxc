@@ -1,0 +1,10 @@
+#!/bin/bash
+. /etc/simplelxc/config
+
+command="$1-$2"
+shift 2
+
+if ! test -f $bin_dir/$command; then
+	echo "Cannot find a suitible command"
+fi
+$bin_dir/$command "$@"
