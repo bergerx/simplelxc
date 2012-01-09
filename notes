@@ -1,17 +1,26 @@
-simplelxc-host-prepare
-simplelxc-host-check
+# guest system operations
+simplelxc guest list
+simplelxc guest create <name> <ip> [<template>]
+#simplelxc-guest-create name <name> ip <ip> [template <squeeze>]
+simplelxc guest copy <name> <name> [<ip>]
+#simplelxc-guest-copy <name> <name> ip <ip>
+simplelxc guest login <name> # logs in as root
+simplelxc guest start <name>
+simplelxc guest stop <name>
+simplelxc guest destroy <name>
+simplelxc guest info [<name>]
+simplelxc guest pack
+simplelxc guest unpack
 
-simplelxc-template-list
-simplelxc-template-create <name> [release <squeeze>]
-simplelxc-template-copy <name> <name>
-simplelxc-template-chroot <name>
+# template operations, typically you dont need to run these manually
+simplelxc template list
+simplelxc template create [<name> [<release>]]
+#simplelxc-template-create <name> [release <squeeze>]
+simplelxc template copy <name> <name>
+simplelxc template chroot <name>
+simplelxc template destroy <name>
 
-simplelxc-guest-list
-simplelxc-guest-create name <name> ip <ip> [template <squeeze>]
-simplelxc-guest-copy <name> <name> ip <ip>
-simplelxc-guest-config <name>
-simplelxc-guest-start <name>
-simplelxc-guest-stop <name>
-simplelxc-guest-destroy <name>
-simplelxc-guest-info [<name>]
+# host system operations you dont need to call these by hand normally
+simplelxc host prepare
+simplelxc host check
 
