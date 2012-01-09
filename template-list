@@ -1,2 +1,3 @@
 #!/bin/bash
+. /etc/simplelxc/config
 ls $templates_dir/
