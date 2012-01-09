@@ -1,0 +1,91 @@
+_simplelxc_lxc_list()
+{
+	cd /var/lib/lxc && compgen -f $1
+}
+
+_simplelxc_running_lxc_list()
+{
+	compgen -W '$(sort <(/usr/bin/lxc-ls | sort -u) <(cd /cgroup/ && /bin/ls -d */ | tr -d "/") | uniq -d)' $1
+}
+
+_simplelxc_notrunning_lxc_list()
+{
+	local all running notrunning
+	all=$(ls /var/lib/lxc/*/config | cut -d'/' -f'5')
+	running=$(cd /cgroup/ && /bin/ls -d */ | tr -d "/")
+	notrunning=$(echo -e "$running\n$running\n$all" | sort | uniq -u)
+	compgen -W '$notrunning' $1
+}
+
+_simplelxc_template_list()
+{
+	cd /var/lib/simplelxc/templates && compgen -f $1
+}
+
+_simplelxc () 
+{
+	local cur prev pprev
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+	pprev="${COMP_WORDS[COMP_CWORD-2]}"
+ 
+	#echo -e "\nprev:'$prev' cur:'$cur' pprev:'$pprev'"
+
+	case "${prev}" in
+		simplelxc)
+			COMPREPLY=( $(compgen -W 'guest template host' $cur) )
+			return 0
+			;;
+		guest)
+			COMPREPLY=( $(compgen -W 'list create copy login start stop destroy info' $cur) )
+			return 0
+			;;
+		template)
+			COMPREPLY=( $(compgen -W 'list create copy chroot destroy' $cur) )
+			return 0
+			;;
+		host)
+			COMPREPLY=( $(compgen -W 'prepare check' $cur) )
+			return 0
+			;;
+		stop|login)
+			COMPREPLY=( $(_simplelxc_running_lxc_list $cur) )
+			return 0
+			;;
+		start|pack)
+			COMPREPLY=( $(_simplelxc_notrunning_lxc_list) )
+			return 0
+			;;
+		chroot)
+			COMPREPLY=( $(_simplelxc_template_list $cur) )
+			return 0
+			;;
+		--template)
+			COMPREPLY=( $(_simplelxc_template_list $cur) )
+			return 0
+			;;
+		info|copy|destroy)
+			if [ "$pprev" == "guest" ]; then
+				COMPREPLY=( $(_simplelxc_lxc_list $cur) )
+				return 0
+			elif [ "$pprev" == "template" ]; then
+				COMPREPLY=( $(_simplelxc_template_list $cur) )
+				return 0
+			fi
+			return 0
+			;;
+		unpack)
+			COMPREPLY=( $(compgen -f $cur) )
+			return 0
+			;;
+		hostname)
+			COMPREPLY=( $(compgen -A hostname $cur) )
+			return 0
+			;;
+		prepare|check|list)
+		return 0
+		;;
+	esac
+}
+complete -F _simplelxc simplelxc
