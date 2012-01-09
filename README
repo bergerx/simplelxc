@@ -1,3 +1,6 @@
+Not for production yet, project is still a baby for now, far from being mature.
+But if you understand bash and lxc, you can test the code.
+
 Main objective of simplelxc is to create new lxc servers on a Debian machine as simple as this:
 $ sudo aptitude install simplelxc
 $ sudo simplelxc create test1
