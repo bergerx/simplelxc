@@ -17,7 +17,7 @@ fi
 
 # if there is no bridge
 if ! brctl show | grep ^$bridge_interface &>/dev/null; then
-	cp /etc/network/interfaces /etc/network/interfaces.$prog_name-bak
+	cp /etc/network/interfaces /etc/network/interfaces.simplelxc-bak
 	cat <<EOF >> /etc/network/interfaces
 auto $bridge_interface
 iface $bridge_interface inet static
@@ -34,7 +34,7 @@ fi
 
 # prepare nat
 if sysctl net.ipv4.ip_forward | grep '0' &>/dev/null; then
-	sed -i.$prog_name-bak "/net.ipv4.ip_forward/s/.*/net.ipv4.ip_forward=1/" /etc/sysctl.conf
+	sed -i.simplelxc-bak "/net.ipv4.ip_forward/s/.*/net.ipv4.ip_forward=1/" /etc/sysctl.conf
 	sysctl -w net.ipv4.ip_forward=1
 fi
 
