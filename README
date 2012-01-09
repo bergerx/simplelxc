@@ -1,0 +1,5 @@
+Main objective of simplelxc is to create new lxc servers on a Debian machine as simple as this:
+$ sudo aptitude install simplelxc
+$ sudo simplelxc create test1
+$ sudo simplelxc login test1
+
