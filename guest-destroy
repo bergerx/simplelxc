@@ -1,0 +1,4 @@
+#!/bin/bash
+name=$1
+lxc-stop -n $name
+lxc-destroy -n $name

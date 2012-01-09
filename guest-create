@@ -1,0 +1,184 @@
+#!/bin/bash
+
+# exit on first error
+set -e
+. /etc/simplelxc/config
+
+function usage {
+	echo "usage: ${0##*/} name <guestname> [ip <ip>] [template <template>]"
+}
+
+function show_error {
+	echo -e "${0##*/}: \E[31m$1" >&2
+	tput sgr0 >&2
+	usage >&2
+	exit 2
+}
+
+# copied from http://www.linuxjournal.com/content/validating-ip-address-bash-script
+function valid_ip {
+	local  ip=$1
+	local  stat=1
+	if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+		OIFS=$IFS
+		IFS='.'
+		ip=($ip)
+		IFS=$OIFS
+		[[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+			&& ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+		stat=$?
+	fi
+	return $stat
+}
+
+if [[ "$EUID" -ne 0 ]]; then
+	show_error "You must be root to run this script. (Hint: use sudo)"
+fi
+
+force=false
+template_name=$default_template
+lxchostname=undefined
+ipaddr=undefined
+while :; do
+	case $1 in
+		-f) shift; force=true;;
+		name) shift; lxchostname="$1"; shift;;
+		ip) shift; ipaddr="$1"; shift;;
+		template) shift; template_name="$1"; shift;;
+		*) break;;
+	esac
+done
+
+template_dir=$templates_dir/$template_name
+
+if [ "$lxchostname" == "undefined" ]; then
+	show_error "You must give a guestname."
+fi
+
+if [ "$ipaddr" == "undefined" ]; then
+	show_error "You must give an IP address."
+fi
+
+if ! test -d "$template_dir"; then
+	if [ "$template_name" == "$default_template" ]; then
+		template-create
+	else
+		show_error "Template ($template_dir) not exists."
+	fi
+fi
+
+if ! valid_ip "$ipaddr"; then
+	show_error "Not a valid ip address ($ipaddr) "
+fi
+
+if [ "$force" != "true" ]; then
+    if host "$lxchostname" | grep --color -C10 'has address' ; then
+    	show_error "Given name ($lxchostname) is in use."
+    fi
+
+    if ping -c 2 -w 4 "$ipaddr"; then
+    	show_error "Given ip address ($ipaddr) is in use."
+    fi
+fi
+
+if ! test -d "$template_dir"; then
+	show_error "Template does not exist."
+fi
+
+## Fixed: mac addresses may be conflict, we should check if it exist
+#mac=00:FF:12:34:$(echo $ipaddr | tr -d '.' | sed 's/^.*\(..\)\(..\)$/\1:\2/')
+# TODO: What if we change a machines IP address later and use that ip in an other machine
+mac=$(printf "02:00:%x:%x:%x:%x" ${ipaddr//./ })
+lxc_dir=$lxcs_dir/$lxchostname
+rootfs=$lxc_dir/rootfs
+config=$lxc_dir/config
+
+echo -e "\E[31m===== variables start ====="; tput sgr0
+cat <<EOS
+name		$lxchostname
+template	$template_dir
+rootfs		$rootfs/
+config		$config
+macaddr		$mac
+ip		$ipaddr
+network		$network
+gateway		$host_ip
+EOS
+echo -e "\E[31m====== variables end ======"; tput sgr0
+
+# create lxc guest system root
+mkdir $lxc_dir
+cp -apr $template_dir $rootfs
+
+sed -i "s/template-$template_name/$lxchostname/g" $(grep -rl "template-$template_name" $rootfs/etc/ 2>/dev/null)
+sed -i "s/127.0.0.2/$ipaddr/g" $(grep -rl "127.0.0.2" $rootfs/etc/ 2>/dev/null)
+
+# remove precreated keys in the template and regenerate them
+touch $rootfs/etc/ssh/sshd_not_to_be_run # ssh must not be run in chroot envirenment,
+                                         # reconfiguring starts it by default
+rm -f $rootfs/etc/ssh/ssh_host_*
+chroot $rootfs dpkg-reconfigure openssh-server 
+rm $rootfs/etc/ssh/sshd_not_to_be_run
+
+# create interface file
+cat <<EOS > $rootfs/etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto eth0
+allow-hotplug eth0
+iface eth0 inet static
+	address $ipaddr
+	network $network
+	gateway $host_ip
+EOS
+
+# lxc host related config
+cat <<EOS > $config
+lxc.tty = 1
+lxc.pts = 1024
+lxc.rootfs = $rootfs
+lxc.cgroup.devices.deny = a
+# /dev/null and zero
+lxc.cgroup.devices.allow = c 1:3 rwm
+lxc.cgroup.devices.allow = c 1:5 rwm
+# consoles
+lxc.cgroup.devices.allow = c 5:1 rwm
+lxc.cgroup.devices.allow = c 5:0 rwm
+lxc.cgroup.devices.allow = c 4:0 rwm
+lxc.cgroup.devices.allow = c 4:1 rwm
+# /dev/{,u}random
+lxc.cgroup.devices.allow = c 1:9 rwm
+lxc.cgroup.devices.allow = c 1:8 rwm
+lxc.cgroup.devices.allow = c 136:* rwm
+lxc.cgroup.devices.allow = c 5:2 rwm
+# rtc
+lxc.cgroup.devices.allow = c 254:0 rwm
+
+# mounts point
+lxc.mount.entry=proc $rootfs/proc proc nodev,noexec,nosuid 0 0
+lxc.mount.entry=devpts $rootfs/dev/pts devpts defaults 0 0
+lxc.mount.entry=sysfs $rootfs/sys sysfs defaults  0 0
+lxc.mount.entry=tmpfs $rootfs/var/lock tmpfs defaults 0 0
+lxc.mount.entry=tmpfs $rootfs/var/run tmpfs defaults 0 0
+
+lxc.mount.entry=/home $rootfs/home none bind   0 0
+
+#lxc.cap.drop = audit_control audit_write mac_admin mac_override mknod net_raw setfcap setpcap sys_admin sys_boot sys_module sys_nice sys_pacct sys_rawio sys_resource sys_time sys_tty_config
+
+lxc.utsname = $lxchostname
+lxc.network.type = veth
+lxc.network.flags = up
+lxc.network.link = $bridge_interface
+lxc.network.name = eth0
+lxc.network.veth.pair = veth-${lxchostname::10}
+lxc.network.hwaddr = $mac
+EOS
+
+# configure host system to start new lxc automatically on startup
+
+#sed -i "s/CONTAINERS=\"\(.*\)\"/CONTAINERS=\"\1 $lxchostname\"/" /etc/default/lxc
+#ln -s $config /etc/lxc/$lxchostname.conf | :
+
+lxc-start -n $lxchostname -d
+echo "$ipaddr $lxchostname"  >> /etc/hosts

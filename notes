@@ -1,0 +1,17 @@
+simplelxc-host-prepare
+simplelxc-host-check
+
+simplelxc-template-list
+simplelxc-template-create <name> [release <squeeze>]
+simplelxc-template-copy <name> <name>
+simplelxc-template-chroot <name>
+
+simplelxc-guest-list
+simplelxc-guest-create name <name> ip <ip> [template <squeeze>]
+simplelxc-guest-copy <name> <name> ip <ip>
+simplelxc-guest-config <name>
+simplelxc-guest-start <name>
+simplelxc-guest-stop <name>
+simplelxc-guest-destroy <name>
+simplelxc-guest-info [<name>]
+

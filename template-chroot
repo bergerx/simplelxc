@@ -1,0 +1,4 @@
+#!/bin/bash
+name=$1
+. /etc/simplelxc/config
+chroot $templates_dir/$name

@@ -1,0 +1,76 @@
+#!/bin/bash -x
+set -e
+. /etc/simplelxc/config
+name=${1:-$default_template}
+release=${2:-$default_template}
+
+release_dir=$debootstraps_dir/$release
+if ! test -d $release_dir; then
+	mkdir -p $(dirname $release_dir)
+	debootstrap --variant=minbase $release $release_dir
+fi
+
+template_dir=$templates_dir/$name
+if test -d $template_dir; then
+	echo $template_dir zaten var
+else
+	mkdir -p $(dirname $template_dir)
+fi
+
+# cp debootstrap root to lxc ready template directory
+cp -apr $release_dir $template_dir | :
+
+echo "template-$name" > $template_dir/etc/hostname
+echo -e "127.0.0.1\tlocalhost\n127.0.0.2\ttemplate-$name" > $template_dir/etc/hosts
+
+
+cat <<EOF > $template_dir/chroot_configure
+#!/bin/bash
+set -e
+
+# set root password
+echo 'root:root' | chpasswd
+
+# install aptitude
+#apt-get install -y aptitude
+
+# dont run openssh-server in chroot environment
+mkdir /etc/ssh | :
+touch /etc/ssh/sshd_not_to_be_run
+
+#aptitude install ifupdown locales libui-dialog-perl dialog vim netbase net-tools iproute openssh-server dhcp3-client bash-completion bzip2 dnsutils bind9-host bsdmainutils ccze less netcat-traditional screen sudo unzip traceroute wget iputils-ping
+apt-get -y install ifupdown locales libui-dialog-perl dialog netbase net-tools iproute openssh-server bsdmainutils iputils-ping
+
+# allow ssh to be run on startup
+rm /etc/ssh/sshd_not_to_be_run
+
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen
+update-locale LANG=en_US.UTF-8
+
+# localtime
+cp /usr/share/zoneinfo/$(head -n 1 /etc/timezone) /etc/localtime
+
+rm /bin/sh; ln -s bash /bin/sh
+/usr/sbin/update-rc.d -f umountfs remove
+/usr/sbin/update-rc.d -f nsca remove
+/usr/sbin/update-rc.d -f hwclock.sh remove
+/usr/sbin/update-rc.d -f hwclockfirst.sh remove
+
+echo nameserver 8.8.8.8 > /etc/resolv.conf
+
+#apt-get clean
+
+# clean log files
+#>/var/log/apt/history.log
+#>/var/log/apt/term.log
+#>/var/log/bootstrap.log
+#>/var/log/dmesg
+#>/var/log/aptitude
+#>/var/log/wtmp
+#>/var/log/btmp
+
+rm /chroot_configure
+EOF
+chmod +x $template_dir/chroot_configure
+chroot $template_dir /chroot_configure

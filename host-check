@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+# TODO: check root
+
+. /etc/simplelxc/config
+
+# check dependencies
+if dpkg -l lxc bridge-utils debootstrap iptables iproute | grep "No packages found" &>/dev/null; then
+	echo "Dependencies failed"
+	exit 2 
+fi
+
+# check cgroup
+if ! grep " cgroup " /proc/mounts &>/dev/null; then
+	echo "cgroup file system failed, not mounted"
+	exit 2 
+fi
+
+# check bridge
+if ! brctl show | grep ^$bridge_interface &>/dev/null; then
+	echo "Bridge interface not exits"
+	exit 2 
+fi
+
+if ! ifconfig $bridge_interface | grep addr:$host_ip &>/dev/null; then
+	echo "Bridge interface not configured"
+	exit 2 
+fi
+
+
+# prepare nat
+if sysctl net.ipv4.ip_forward | grep '0' &>/dev/null; then
+	echo "IP forwarding not set"
+	exit 2 
+fi
+
+if ! iptables -L -t nat | grep $network &>/dev/null; then
+	echo "NAT rules (iptables) not configured"
+	exit 2 
+fi
+
+exit 0

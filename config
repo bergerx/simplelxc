@@ -1,0 +1,11 @@
+prog_name=simplelxc
+bridge_interface=br1
+network=192.168.173.0
+host_ip=192.168.173.1
+etc_dir=/etc/$prog_name
+bin_dir=/var/lib/$prog_name/bin
+templates_dir=/var/lib/$prog_name/templates
+debootstraps_dir=/var/lib/$prog_name/debootstraps
+lxcs_dir=/var/lib/lxc
+default_template=squeeze
+PATH=$PATH:/var/lib/$prog_name/bin

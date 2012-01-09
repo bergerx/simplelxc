@@ -1,0 +1,12 @@
+#!/bin/bash
+from=$1
+to=$2
+ip=$4
+. /etc/simplelxc/config
+
+cp -rap $lxcs_dir/$from $lxcs_dir/$to
+rootfs=$lxcs_dir/$to/rootfs
+sed -i "s/$from/$to/g" $(grep -rl "$from" $rootfs/etc/ 2>/dev/null)
+sed -i "s/$oldip/$ip/g" $(grep -rl "$oldip" $rootfs/etc/ 2>/dev/null)
+
+lxc-start -d -n $to
