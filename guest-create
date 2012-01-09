@@ -5,7 +5,7 @@ set -e
 . /etc/simplelxc/config
 
 function usage {
-	echo "usage: ${0##*/} name <guestname> [ip <ip>] [template <template>]"
+	echo "usage: ${0##*/} name <guestname> <ip> [<template>]"
 }
 
 function show_error {
@@ -35,19 +35,9 @@ if [[ "$EUID" -ne 0 ]]; then
 	show_error "You must be root to run this script. (Hint: use sudo)"
 fi
 
-force=false
-template_name=$default_template
-lxchostname=undefined
-ipaddr=undefined
-while :; do
-	case $1 in
-		-f) shift; force=true;;
-		name) shift; lxchostname="$1"; shift;;
-		ip) shift; ipaddr="$1"; shift;;
-		template) shift; template_name="$1"; shift;;
-		*) break;;
-	esac
-done
+lxchostname=${1:-undefined}
+ipaddr=${2:-undefined}
+template_name=${3:-$default_template}
 
 template_dir=$templates_dir/$template_name
 
@@ -61,7 +51,10 @@ fi
 
 if ! test -d "$template_dir"; then
 	if [ "$template_name" == "$default_template" ]; then
-		template-create
+		if ! $bin_dir/host-check &>/dev/null; then
+			$bin_dir/host-prepare
+		fi
+		$bin_dir/template-create
 	else
 		show_error "Template ($template_dir) not exists."
 	fi
@@ -71,14 +64,12 @@ if ! valid_ip "$ipaddr"; then
 	show_error "Not a valid ip address ($ipaddr) "
 fi
 
-if [ "$force" != "true" ]; then
-    if host "$lxchostname" | grep --color -C10 'has address' ; then
-    	show_error "Given name ($lxchostname) is in use."
-    fi
+if host "$lxchostname" | grep --color -C10 'has address' ; then
+	show_error "Given name ($lxchostname) is in use."
+fi
 
-    if ping -c 2 -w 4 "$ipaddr"; then
-    	show_error "Given ip address ($ipaddr) is in use."
-    fi
+if ping -c 2 -w 4 "$ipaddr"; then
+	show_error "Given ip address ($ipaddr) is in use."
 fi
 
 if ! test -d "$template_dir"; then

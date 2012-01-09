@@ -2,10 +2,8 @@
 bridge_interface=br1
 network=192.168.173.0
 host_ip=192.168.173.1
-etc_dir=/etc/simplelxc
 bin_dir=/home/bekir/repos/simplelxc
 templates_dir=/var/lib/simplelxc/templates
 debootstraps_dir=/var/lib/simplelxc/debootstraps
 lxcs_dir=/var/lib/lxc
 default_template=squeeze
-PATH=$PATH:$bin_dir
