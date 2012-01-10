@@ -6,29 +6,40 @@ $ sudo aptitude install simplelxc
 $ sudo simplelxc create test1
 $ sudo simplelxc login test1
 
-
 Planning command line reference:
 
-# guest system operations
+# Guest system operations, you can omit "guest" parameter
 simplelxc guest list
 simplelxc guest create <guest_name> <ip> [<template_name>]
 simplelxc guest copy <guest_name> <guest_name> [<ip>]
 simplelxc guest login <guest_name> # logs in as root
-simplelxc guest start <guest_name>
-simplelxc guest stop <guest_name>
+simplelxc guest start|stop|restart <guest_name>
 simplelxc guest destroy <guest_name>
-simplelxc guest info [<guest_name>]
-simplelxc guest pack
-simplelxc guest unpack
+simplelxc guest info <guest_name>
+simplelxc guest pack <guest_name>
+simplelxc guest unpack <file_name>
 
-# template operations, typically you dont need to run these manually
+# Template operations, typically you dont need to run these manually
 simplelxc template list
 simplelxc template create [<template_name> [<debian_release_name>]]
 simplelxc template copy <template_name> <template_name>
 simplelxc template chroot <template_name>
 simplelxc template destroy <template_name>
 
-# host system operations you dont need to call these by hand normally
+# Host system operations you dont need to call these by hand normally
 simplelxc host prepare
 simplelxc host check
+
+# Current installation procedure
+sudo aptitude install lxc bridge-utils debootstrap iptables iproute
+sudo cp config /etc/simplelxc
+sudo mkdir /usr/lib/simplelxc
+sudo cp guest-* template-* host-*
+sudo sed 's!.*bin_dir.*!/usr/lib/simplelxc!g'  # editing "bin_dir" parameter is enough
+sudo cp _simplelxc /etc/bash_completion.d/simplelxc
+
+# try these
+sudo sl <tab><tab>
+sudo sl cr<tab>
+sudo sl start <tab>
 
