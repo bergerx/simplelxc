@@ -49,17 +49,6 @@ if [ "$ipaddr" == "undefined" ]; then
 	show_error "You must give an IP address."
 fi
 
-if ! test -d "$template_dir"; then
-	if [ "$template_name" == "$default_template" ]; then
-		if ! $bin_dir/host-check &>/dev/null; then
-			$bin_dir/host-prepare
-		fi
-		$bin_dir/template-create
-	else
-		show_error "Template ($template_dir) not exists."
-	fi
-fi
-
 if ! valid_ip "$ipaddr"; then
 	show_error "Not a valid ip address ($ipaddr) "
 fi
@@ -72,8 +61,16 @@ if ping -c 2 -w 4 "$ipaddr"; then
 	show_error "Given ip address ($ipaddr) is in use."
 fi
 
+if ! $bin_dir/host-check &>/dev/null; then
+	$bin_dir/host-prepare
+fi
+
+if ! test -d "$template_dir" -a "$template_name" == "$default_template"; then
+	$bin_dir/template-create "$template_name" "$template_name"
+fi
+
 if ! test -d "$template_dir"; then
-	show_error "Template does not exist."
+	show_error "Template ($template_dir) not exists."
 fi
 
 ## Fixed: mac addresses may be conflict, we should check if it exist
