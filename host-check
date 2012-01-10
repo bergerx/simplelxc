@@ -3,7 +3,7 @@ set -e
 
 # TODO: check root
 
-. /etc/simplelxc/config
+. /etc/simplelxc
 
 # check dependencies
 if dpkg -l lxc bridge-utils debootstrap iptables iproute | grep "No packages found" &>/dev/null; then

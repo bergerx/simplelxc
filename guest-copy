@@ -2,7 +2,9 @@
 from=$1
 to=$2
 ip=$4
-. /etc/simplelxc/config
+. /etc/simplelxc
+
+oldip=$(cat $lxcs_dir/$from/rootfs/etc/hosts | awk "/$from/ {print \$1}")
 
 cp -rap $lxcs_dir/$from $lxcs_dir/$to
 rootfs=$lxcs_dir/$to/rootfs

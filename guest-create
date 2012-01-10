@@ -2,7 +2,7 @@
 
 # exit on first error
 set -e
-. /etc/simplelxc/config
+. /etc/simplelxc
 
 function usage {
 	echo "usage: ${0##*/} name <guestname> <ip> [<template>]"

@@ -3,7 +3,7 @@
 # exit on first error
 set -e
 
-. /etc/simplelxc/config
+. /etc/simplelxc
 
 # by dependencies
 aptitude install -y lxc bridge-utils debootstrap iptables iproute

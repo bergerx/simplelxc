@@ -1,6 +1,6 @@
 #!/bin/bash -x
 set -e
-. /etc/simplelxc/config
+. /etc/simplelxc
 name=${1:-$default_template}
 release=${2:-$default_template}
 

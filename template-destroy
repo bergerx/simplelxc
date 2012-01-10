@@ -1,6 +1,6 @@
 #!/bin/bash
 name=${1:-undefined}
-. /etc/simplelxc/config
+. /etc/simplelxc
 
 if [ "$name" == "undefined" ]; then
 	echo "Template name not given"

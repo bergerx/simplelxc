@@ -1,4 +1,4 @@
 #!/bin/bash
 name=$1
-. /etc/simplelxc/config
+. /etc/simplelxc
 vi $lxcs_dir/$name/config

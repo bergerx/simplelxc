@@ -1,5 +1,5 @@
 #!/bin/bash
-. /etc/simplelxc/config
+. /etc/simplelxc
 
 command="$1-$2"
 shift 2
