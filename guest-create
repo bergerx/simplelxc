@@ -155,7 +155,7 @@ lxc.mount.entry=tmpfs $rootfs/var/run tmpfs defaults 0 0
 
 lxc.mount.entry=/home $rootfs/home none bind   0 0
 
-#lxc.cap.drop = audit_control audit_write mac_admin mac_override mknod net_raw setfcap setpcap sys_admin sys_boot sys_module sys_nice sys_pacct sys_rawio sys_resource sys_time sys_tty_config
+lxc.cap.drop = audit_control audit_write mac_admin mac_override mknod net_raw setfcap setpcap sys_admin sys_boot sys_module sys_nice sys_pacct sys_rawio sys_resource sys_time sys_tty_config
 
 lxc.utsname = $lxchostname
 lxc.network.type = veth
@@ -169,7 +169,7 @@ EOS
 # configure host system to start new lxc automatically on startup
 
 #sed -i "s/CONTAINERS=\"\(.*\)\"/CONTAINERS=\"\1 $lxchostname\"/" /etc/default/lxc
-#ln -s $config /etc/lxc/$lxchostname.conf | :
+ln -s $config /etc/lxc/$lxchostname.conf | :
 
 lxc-start -n $lxchostname -d
 echo "$ipaddr $lxchostname"  >> /etc/hosts
