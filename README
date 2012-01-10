@@ -7,7 +7,7 @@ $ sudo simplelxc create test1
 $ sudo simplelxc login test1
 
 
-Planning command line referance:
+Planning command line reference:
 
 # guest system operations
 simplelxc guest list
