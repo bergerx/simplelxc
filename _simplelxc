@@ -24,29 +24,34 @@ _simplelxc_template_list()
 
 _simplelxc () 
 {
-	local cur prev pprev
+	local cur prev pprev glist sllist tlist hlist
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 	pprev="${COMP_WORDS[COMP_CWORD-2]}"
- 
+
+	sllist='guest template host'
+	glist='list create copy login start stop destroy info'
+	tlist='list create copy chroot destroy'
+	hlist='prepare check'
+
 	#echo -e "\nprev:'$prev' cur:'$cur' pprev:'$pprev'"
 
 	case "${prev}" in
-		simplelxc)
-			COMPREPLY=( $(compgen -W 'guest template host' $cur) )
+		simplelxc|sl)
+			COMPREPLY=( $(compgen -W "$sllist $glist" $cur) )
 			return 0
 			;;
 		guest)
-			COMPREPLY=( $(compgen -W 'list create copy login start stop destroy info' $cur) )
+			COMPREPLY=( $(compgen -W "$glist" $cur) )
 			return 0
 			;;
 		template)
-			COMPREPLY=( $(compgen -W 'list create copy chroot destroy' $cur) )
+			COMPREPLY=( $(compgen -W "$tlist" $cur) )
 			return 0
 			;;
 		host)
-			COMPREPLY=( $(compgen -W 'prepare check' $cur) )
+			COMPREPLY=( $(compgen -W "$hlist" $cur) )
 			return 0
 			;;
 		stop|login)
@@ -66,7 +71,7 @@ _simplelxc ()
 			return 0
 			;;
 		info|copy|destroy)
-			if [ "$pprev" == "guest" ]; then
+			if [ "$pprev" == "guest" -o "$pprev" == "simplelxc" -o "$pprev" == "sl" ]; then
 				COMPREPLY=( $(_simplelxc_lxc_list $cur) )
 				return 0
 			elif [ "$pprev" == "template" ]; then
@@ -79,13 +84,9 @@ _simplelxc ()
 			COMPREPLY=( $(compgen -f $cur) )
 			return 0
 			;;
-		hostname)
-			COMPREPLY=( $(compgen -A hostname $cur) )
-			return 0
-			;;
 		prepare|check|list)
 		return 0
 		;;
 	esac
 }
-complete -F _simplelxc simplelxc
+complete -F _simplelxc simplelxc sl

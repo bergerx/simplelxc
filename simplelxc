@@ -1,8 +1,15 @@
 #!/bin/bash
 . /etc/simplelxc
 
-command="$1-$2"
-shift 2
+glist='list create copy login start stop destroy info'
+
+if echo $glist | grep $1 &>/dev/null; then
+	command="guest-$1"
+	shift 1
+else
+	command="$1-$2"
+	shift 2
+fi
 
 if ! test -f $bin_dir/$command; then
 	echo "Cannot find a suitible command"
