@@ -1,0 +1,5 @@
+#!/bin/bash
+name=$1
+. /etc/simplelxc
+ip=$(cat $lxcs_dir/$name/rootfs/etc/hosts | awk "/$name/ {print \$1}")
+ssh root@$ip
