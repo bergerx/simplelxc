@@ -1,5 +1,5 @@
 #!/bin/bash
-bridge_interface=br1
+bridge_interface=simplelxcbr
 network=192.168.173.0
 host_ip=192.168.173.1
 bin_dir=/home/bekir/repos/simplelxc
