@@ -1,4 +1,6 @@
 #!/bin/bash
 name=$1
 lxc-stop -n $name
+rm -f $config /etc/lxc/$name.conf
+rm -f $config /etc/lxc/auto/$name.conf
 lxc-destroy -n $name
