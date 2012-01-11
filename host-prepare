@@ -22,7 +22,7 @@ if ! brctl show | grep ^$bridge_interface &>/dev/null; then
 auto $bridge_interface
 iface $bridge_interface inet static
 	address $host_ip
-	netmask 255.255.255.0
+	netmask $netmask
 	bridge_ports none
 	bridge_fd 9
 	bridge_hello 2
