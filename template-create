@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 set -e
 . /etc/simplelxc
 name=${1:-$default_template}

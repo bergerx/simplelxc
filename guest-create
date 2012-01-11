@@ -118,6 +118,7 @@ allow-hotplug eth0
 iface eth0 inet static
 	address $ipaddr
 	network $network
+	netmask $netmask
 	gateway $host_ip
 EOS
 
