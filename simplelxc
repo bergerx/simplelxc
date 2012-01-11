@@ -1,7 +1,7 @@
 #!/bin/bash
 . /etc/simplelxc
 
-glist='list create copy login start stop destroy info'
+glist='list create copy login start stop destroy info restart config chroot'
 
 if echo $glist | grep $1 &>/dev/null; then
 	command="guest-$1"
@@ -14,4 +14,4 @@ fi
 if ! test -f $bin_dir/$command; then
 	echo "Cannot find a suitible command"
 fi
-$bin_dir/$command "$@"
+exec $bin_dir/$command "$@"
