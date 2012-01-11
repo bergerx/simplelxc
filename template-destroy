@@ -6,4 +6,4 @@ if [ "$name" == "undefined" ]; then
 	echo "Template name not given"
 	exit 2
 fi
-rm -rf $templates_dir/$name
+rm -rf $TEMPLATES_DIR/$name

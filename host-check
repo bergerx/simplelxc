@@ -18,12 +18,12 @@ if ! grep " cgroup " /proc/mounts &>/dev/null; then
 fi
 
 # check bridge
-if ! brctl show | grep ^$bridge_interface &>/dev/null; then
+if ! brctl show | grep ^$BRIDGE_INTERFACE &>/dev/null; then
 	echo "Bridge interface not exits"
 	exit 2 
 fi
 
-if ! ifconfig $bridge_interface | grep addr:$host_ip &>/dev/null; then
+if ! ifconfig $BRIDGE_INTERFACE | grep addr:$HOST_IP &>/dev/null; then
 	echo "Bridge interface not configured"
 	exit 2 
 fi
@@ -35,7 +35,7 @@ if sysctl net.ipv4.ip_forward | grep '0' &>/dev/null; then
 	exit 2 
 fi
 
-if ! iptables -L -t nat | grep $network &>/dev/null; then
+if ! iptables -L -t nat | grep $NETWORK &>/dev/null; then
 	echo "NAT rules (iptables) not configured"
 	exit 2 
 fi

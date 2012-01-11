@@ -16,20 +16,20 @@ if ! grep " cgroup " /proc/mounts &>/dev/null; then
 fi
 
 # if there is no bridge
-if ! brctl show | grep ^$bridge_interface &>/dev/null; then
+if ! brctl show | grep ^$BRIDGE_INTERFACE &>/dev/null; then
 	cp /etc/network/interfaces /etc/network/interfaces.simplelxc-bak
 	cat <<EOF >> /etc/network/interfaces
-auto $bridge_interface
-iface $bridge_interface inet static
-	address $host_ip
-	netmask $netmask
+auto $BRIDGE_INTERFACE
+iface $BRIDGE_INTERFACE inet static
+	address $HOST_IP
+	netmask $NETMASK
 	bridge_ports none
 	bridge_fd 9
 	bridge_hello 2
 	bridge_maxage 12
 	bridge_stp off
 EOF
-	ifup -v $bridge_interface
+	ifup -v $BRIDGE_INTERFACE
 fi
 
 # prepare nat
@@ -38,9 +38,9 @@ if sysctl net.ipv4.ip_forward | grep '0' &>/dev/null; then
 	sysctl -w net.ipv4.ip_forward=1
 fi
 
-if ! iptables -L -t nat | grep $network &>/dev/null; then
+if ! iptables -L -t nat | grep $NETWORK &>/dev/null; then
 	out_interface=$(ip route ls | grep ^default | sed 's/.* dev \([^ ]\+\)/\1/g')
-	iptables -t nat -s $network/24 -A POSTROUTING -o wlan0 -j MASQUERADE
+	iptables -t nat -s $NETWORK/24 -A POSTROUTING -o wlan0 -j MASQUERADE
 	iptables-save > /etc/iptables.up.rules
 	cat<<-EOF > /etc/network/if-pre-up.d/iptables
 	#!/bin/bash

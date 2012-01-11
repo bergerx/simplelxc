@@ -35,7 +35,7 @@ sudo aptitude install lxc bridge-utils debootstrap iptables iproute
 sudo cp config /etc/simplelxc
 sudo mkdir /usr/lib/simplelxc
 sudo cp guest-* template-* host-*
-sudo sed 's!.*bin_dir.*!/usr/lib/simplelxc!g'  # editing "bin_dir" parameter is enough
+sudo sed 's!.*BIN_DIR.*!/usr/lib/simplelxc!g'  # editing "BIN_DIR" parameter is enough
 sudo cp _simplelxc /etc/bash_completion.d/simplelxc
 
 # try these

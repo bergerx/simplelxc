@@ -1,7 +1,7 @@
 #!/bin/bash
 name=$1
 . /etc/simplelxc
-vi $lxcs_dir/$name/config
+vi $LXCS_DIR/$name/config
 # TODO: check if lxc is running first
 echo "You must restart the server if it running, you can do i t by typing this:"
 echo ">>> 'sudo simplelxc restart $name'"

@@ -11,7 +11,7 @@ else
 	shift 2
 fi
 
-if ! test -f $bin_dir/$command; then
+if ! test -f $BIN_DIR/$command; then
 	echo "Cannot find a suitible command"
 fi
-exec $bin_dir/$command "$@"
+exec $BIN_DIR/$command "$@"

@@ -4,10 +4,10 @@ to=$2
 ip=$4
 . /etc/simplelxc
 
-oldip=$(cat $lxcs_dir/$from/rootfs/etc/hosts | awk "/$from/ {print \$1}")
+oldip=$(cat $LXCS_DIR/$from/rootfs/etc/hosts | awk "/$from/ {print \$1}")
 
-cp -rap $lxcs_dir/$from $lxcs_dir/$to
-rootfs=$lxcs_dir/$to/rootfs
+cp -rap $LXCS_DIR/$from $LXCS_DIR/$to
+rootfs=$LXCS_DIR/$to/rootfs
 sed -i "s/$from/$to/g" $(grep -rl "$from" $rootfs/etc/ 2>/dev/null)
 sed -i "s/$oldip/$ip/g" $(grep -rl "$oldip" $rootfs/etc/ 2>/dev/null)
 

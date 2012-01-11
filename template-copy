@@ -3,5 +3,5 @@ from=$1
 to=$2
 . /etc/simplelxc
 
-cp -rap $templates_dir/$from $templates_dir/$to
-sed -i "s/template-$from/template-$to/g" $(grep -rl "template-$from" $templates_dir/$to/etc/ 2>/dev/null)
+cp -rap $TEMPLATES_DIR/$from $TEMPLATES_DIR/$to
+sed -i "s/template-$from/template-$to/g" $(grep -rl "template-$from" $TEMPLATES_DIR/$to/etc/ 2>/dev/null)

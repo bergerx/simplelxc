@@ -37,9 +37,9 @@ fi
 
 lxchostname=${1:-undefined}
 ipaddr=${2:-undefined}
-template_name=${3:-$default_template}
+template_name=${3:-$DEFAULT_TEMPLATE}
 
-template_dir=$templates_dir/$template_name
+template_dir=$TEMPLATES_DIR/$template_name
 
 if [ "$lxchostname" == "undefined" ]; then
 	show_error "You must give a guestname."
@@ -61,12 +61,12 @@ if ping -c 2 -w 4 "$ipaddr"; then
 	show_error "Given ip address ($ipaddr) is in use."
 fi
 
-if ! $bin_dir/host-check &>/dev/null; then
-	$bin_dir/host-prepare
+if ! $BIN_DIR/host-check &>/dev/null; then
+	$BIN_DIR/host-prepare
 fi
 
-if ! test -d "$template_dir" -a "$template_name" == "$default_template"; then
-	$bin_dir/template-create "$template_name" "$template_name"
+if ! test -d "$template_dir" -a "$template_name" == "$DEFAULT_TEMPLATE"; then
+	$BIN_DIR/template-create "$template_name" "$template_name"
 fi
 
 if ! test -d "$template_dir"; then
@@ -77,7 +77,7 @@ fi
 #mac=00:FF:12:34:$(echo $ipaddr | tr -d '.' | sed 's/^.*\(..\)\(..\)$/\1:\2/')
 # TODO: What if we change a machines IP address later and use that ip in an other machine
 mac=$(printf "02:00:%x:%x:%x:%x" ${ipaddr//./ })
-lxc_dir=$lxcs_dir/$lxchostname
+lxc_dir=$LXCS_DIR/$lxchostname
 rootfs=$lxc_dir/rootfs
 config=$lxc_dir/config
 
@@ -89,8 +89,8 @@ rootfs		$rootfs/
 config		$config
 macaddr		$mac
 ip		$ipaddr
-network		$network
-gateway		$host_ip
+network		$NETWORK
+gateway		$HOST_IP
 EOS
 echo -e "\E[31m====== variables end ======"; tput sgr0
 
@@ -117,9 +117,9 @@ auto eth0
 allow-hotplug eth0
 iface eth0 inet static
 	address $ipaddr
-	network $network
-	netmask $netmask
-	gateway $host_ip
+	network $NETWORK
+	netmask $NETMASK
+	gateway $HOST_IP
 EOS
 
 # lxc host related config
@@ -158,7 +158,7 @@ lxc.cap.drop = audit_control audit_write mac_admin mac_override mknod net_raw se
 lxc.utsname = $lxchostname
 lxc.network.type = veth
 lxc.network.flags = up
-lxc.network.link = $bridge_interface
+lxc.network.link = $BRIDGE_INTERFACE
 lxc.network.name = eth0
 lxc.network.veth.pair = veth-${lxchostname::10}
 lxc.network.hwaddr = $mac

@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 . /etc/simplelxc
-name=${1:-$default_template}
-release=${2:-$default_template}
+name=${1:-$DEFAULT_TEMPLATE}
+release=${2:-$DEFAULT_TEMPLATE}
 
-release_dir=$debootstraps_dir/$release
+release_dir=$DEBOOTSTRAPS_DIR/$release
 if ! test -d $release_dir; then
 	mkdir -p $(dirname $release_dir)
 	debootstrap --variant=minbase $release $release_dir
 fi
 
-template_dir=$templates_dir/$name
+template_dir=$TEMPLATES_DIR/$name
 if test -d $template_dir; then
 	echo $template_dir zaten var
 else
