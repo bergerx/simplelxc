@@ -1,0 +1,4 @@
+#!/bin/bash
+name=$1
+. /etc/simplelxc
+chroot $lxcs_dir/$name/rootfs
