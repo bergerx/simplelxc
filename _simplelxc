@@ -1,17 +1,17 @@
 _simplelxc_lxc_list()
 {
-	cd /var/lib/lxc && compgen -f $1
+	compgen -W "$(ls /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5)" $1
 }
 
 _simplelxc_running_lxc_list()
 {
-	compgen -W '$(sort <(/usr/bin/lxc-ls | sort -u) <(cd /cgroup/ && /bin/ls -d */ | tr -d "/") | uniq -d)' $1
+	compgen -W "$(sort <(ls /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5 | sort -u) <(cd /cgroup/ && /bin/ls -d */ | tr -d "/") | uniq -d)" $1
 }
 
 _simplelxc_notrunning_lxc_list()
 {
 	local all running notrunning
-	all=$(ls /var/lib/lxc/*/config | cut -d'/' -f'5')
+	all=$(ls /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5)
 	running=$(cd /cgroup/ && /bin/ls -d */ | tr -d "/")
 	notrunning=$(echo -e "$running\n$running\n$all" | sort | uniq -u)
 	compgen -W '$notrunning' $1
@@ -31,7 +31,7 @@ _simplelxc ()
 	pprev="${COMP_WORDS[COMP_CWORD-2]}"
 
 	sllist='guest template host'
-	glist='list create copy login start stop destroy info'
+	glist='list create copy login start stop destroy info restart config'
 	tlist='list create copy chroot destroy'
 	hlist='prepare check'
 
@@ -54,16 +54,20 @@ _simplelxc ()
 			COMPREPLY=( $(compgen -W "$hlist" $cur) )
 			return 0
 			;;
-		stop|login)
+		stop|login|restart)
 			COMPREPLY=( $(_simplelxc_running_lxc_list $cur) )
 			return 0
 			;;
 		start|pack)
-			COMPREPLY=( $(_simplelxc_notrunning_lxc_list) )
+			COMPREPLY=( $(_simplelxc_notrunning_lxc_list $cur) )
 			return 0
 			;;
 		chroot)
 			COMPREPLY=( $(_simplelxc_template_list $cur) )
+			return 0
+			;;
+		config)
+			COMPREPLY=( $(_simplelxc_lxc_list $cur) )
 			return 0
 			;;
 		--template)
