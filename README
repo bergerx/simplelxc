@@ -9,15 +9,15 @@ $ sudo simplelxc login test1
 Planning command line reference:
 
 # Guest system operations, you can omit "guest" parameter
-simplelxc guest list
-simplelxc guest create <guest_name> <ip> [<template_name>]
-simplelxc guest copy <guest_name> <guest_name> [<ip>]
-simplelxc guest login <guest_name> # logs in as root
-simplelxc guest start|stop|restart <guest_name>
-simplelxc guest destroy <guest_name>
-simplelxc guest info <guest_name>
-simplelxc guest pack <guest_name>
-simplelxc guest unpack <file_name>
+simplelxc [guest] list
+simplelxc [guest] create <guest_name> [<ip>] [<template_name>]
+simplelxc [guest] copy <guest_name> <guest_name> [<ip>]
+simplelxc [guest] login <guest_name> # logs in as root
+simplelxc [guest] start|stop|restart <guest_name>
+simplelxc [guest] destroy <guest_name>
+simplelxc [guest] info <guest_name>
+simplelxc [guest] pack <guest_name>
+simplelxc [guest] unpack <file_name>
 
 # Template operations, typically you dont need to run these manually
 simplelxc template list
