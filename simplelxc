@@ -12,6 +12,6 @@ else
 fi
 
 if ! test -f $BIN_DIR/$command; then
-	echo "Cannot find a suitible command"
+	echo "Cannot find a suitable command"
 fi
 exec $BIN_DIR/$command "$@"
