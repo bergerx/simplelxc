@@ -1,3 +1,3 @@
 #!/bin/bash
 name=$1
-lxc-start -n $name -d
+lxc-start --name $name --daemon
