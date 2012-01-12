@@ -7,7 +7,7 @@ release=${2:-$DEFAULT_TEMPLATE}
 release_dir=$DEBOOTSTRAPS_DIR/$release
 if ! test -d $release_dir; then
 	mkdir -p $(dirname $release_dir)
-	debootstrap --variant=minbase $release $release_dir
+	debootstrap --variant=minbase $release $release_dir http://$HOST_IP:3142/ftp.debian.org/debian
 fi
 
 template_dir=$TEMPLATES_DIR/$name
@@ -23,23 +23,25 @@ cp -apr $release_dir $template_dir | :
 echo "template-$name" > $template_dir/etc/hostname
 echo -e "127.0.0.1\tlocalhost\n127.0.0.2\ttemplate-$name" > $template_dir/etc/hosts
 
+# disable all ttys
+sed -i '/getty 38400/s/\(.*\)/#\1/g' $template_dir/etc/inittab
+
+# Fix mtab
+rm -f $template_dir/etc/mtab
+ln -s /proc/mounts $template_dir/etc/mtab
+
+# configure apt-cacher-ng
+echo "Acquire::http::Proxy \"http://$HOST_IP:3142/\";" > $template_dir/etc/apt/apt.conf.d/000apt-cacher-ng-proxy
 
 cat <<EOF > $template_dir/chroot_configure
 #!/bin/bash
 set -e
 
-# set root password
-echo 'root:root' | chpasswd
-
-# install aptitude
-#apt-get install -y aptitude
-
 # dont run openssh-server in chroot environment
-mkdir /etc/ssh | :
+mkdir -p /etc/ssh
 touch /etc/ssh/sshd_not_to_be_run
 
-#aptitude install ifupdown locales libui-dialog-perl dialog vim netbase net-tools iproute openssh-server dhcp3-client bash-completion bzip2 dnsutils bind9-host bsdmainutils ccze less netcat-traditional screen sudo unzip traceroute wget iputils-ping
-apt-get -y install ifupdown locales libui-dialog-perl dialog netbase net-tools iproute openssh-server bsdmainutils iputils-ping
+apt-get -y install ifupdown locales libui-dialog-perl dialog netbase net-tools iproute openssh-server bsdmainutils iputils-ping sudo vim netcat-traditional 
 
 # allow ssh to be run on startup
 rm /etc/ssh/sshd_not_to_be_run
@@ -53,9 +55,9 @@ cp /usr/share/zoneinfo/$(head -n 1 /etc/timezone) /etc/localtime
 
 rm /bin/sh; ln -s bash /bin/sh
 /usr/sbin/update-rc.d -f umountfs remove
-/usr/sbin/update-rc.d -f nsca remove
 /usr/sbin/update-rc.d -f hwclock.sh remove
 /usr/sbin/update-rc.d -f hwclockfirst.sh remove
+/usr/sbin/update-rc.d -f mtab.sh remove
 
 echo nameserver 8.8.8.8 > /etc/resolv.conf
 

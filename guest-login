@@ -2,4 +2,4 @@
 name=$1
 . /etc/simplelxc
 ip=$(cat $LXCS_DIR/$name/rootfs/etc/hosts | awk "/$name/ {print \$1}")
-ssh root@$ip
+ssh -o StrictHostKeyChecking=no -i /etc/ssh/ssh_host_rsa_key root@$ip

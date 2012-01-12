@@ -57,7 +57,7 @@ if host "$lxchostname" | grep --color -C10 'has address' ; then
 	show_error "Given name ($lxchostname) is in use."
 fi
 
-if ping -c 2 -w 4 "$ipaddr"; then
+if ping -c 2 -w 4 "$ipaddr" &>/dev/null; then
 	show_error "Given ip address ($ipaddr) is in use."
 fi
 
@@ -102,11 +102,8 @@ sed -i "s/template-$template_name/$lxchostname/g" $(grep -rl "template-$template
 sed -i "s/127.0.0.2/$ipaddr/g" $(grep -rl "127.0.0.2" $rootfs/etc/ 2>/dev/null)
 
 # remove precreated keys in the template and regenerate them
-touch $rootfs/etc/ssh/sshd_not_to_be_run # ssh must not be run in chroot envirenment,
-                                         # reconfiguring starts it by default
 rm -f $rootfs/etc/ssh/ssh_host_*
 chroot $rootfs dpkg-reconfigure openssh-server 
-rm $rootfs/etc/ssh/sshd_not_to_be_run
 
 # create interface file
 cat <<EOS > $rootfs/etc/network/interfaces
@@ -124,18 +121,13 @@ EOS
 
 # lxc host related config
 cat <<EOS > $config
-lxc.tty = 1
+lxc.tty = 0
 lxc.pts = 1024
 lxc.rootfs = $rootfs
 lxc.cgroup.devices.deny = a
 # /dev/null and zero
 lxc.cgroup.devices.allow = c 1:3 rwm
 lxc.cgroup.devices.allow = c 1:5 rwm
-# consoles
-lxc.cgroup.devices.allow = c 5:1 rwm
-lxc.cgroup.devices.allow = c 5:0 rwm
-lxc.cgroup.devices.allow = c 4:0 rwm
-lxc.cgroup.devices.allow = c 4:1 rwm
 # /dev/{,u}random
 lxc.cgroup.devices.allow = c 1:9 rwm
 lxc.cgroup.devices.allow = c 1:8 rwm
@@ -151,7 +143,12 @@ lxc.mount.entry=sysfs $rootfs/sys sysfs defaults  0 0
 lxc.mount.entry=tmpfs $rootfs/var/lock tmpfs defaults 0 0
 lxc.mount.entry=tmpfs $rootfs/var/run tmpfs defaults 0 0
 
-lxc.mount.entry=/home $rootfs/home none bind   0 0
+# You can enable these lines if you want your user and home directory in this LXC
+# But if you do that, you cant add/remove user inside LXC, gor example you cant
+# install an application who create its own user
+#lxc.mount.entry=/home $rootfs/home none bind   0 0
+#lxc.mount.entry=/etc/passwd $rootfs/etc/passwd none defaults,bind,ro 0 0
+#lxc.mount.entry=/etc/shadow $rootfs/etc/shadow none defaults,bind,ro 0 0
 
 lxc.cap.drop = audit_control audit_write mac_admin mac_override mknod net_raw setfcap setpcap sys_admin sys_boot sys_module sys_nice sys_pacct sys_rawio sys_resource sys_time sys_tty_config
 
@@ -164,10 +161,17 @@ lxc.network.veth.pair = veth-${lxchostname::10}
 lxc.network.hwaddr = $mac
 EOS
 
-# configure host system to start new lxc automatically on startup
-
-#sed -i "s/CONTAINERS=\"\(.*\)\"/CONTAINERS=\"\1 $lxchostname\"/" /etc/default/lxc
+sed -i "/^CONTAINERS=/s/CONTAINERS=\"\(.*\)\"/CONTAINERS=\" \1 $lxchostname\"/" /etc/default/lxc
 ln -s $config /etc/lxc/$lxchostname.conf | :
 
-lxc-start -n $lxchostname -d
-echo "$ipaddr $lxchostname"  >> /etc/hosts
+# put host key to guest
+tmp_umask=$(umask)
+umask 077
+mkdir -p $rootfs/root/.ssh
+cat /etc/ssh/ssh_host_rsa_key.pub >> $rootfs/root/.ssh/authorized_keys
+umask $tmp_umask
+
+$BIN_DIR/guest-start $lxchostname
+lxc-wait --name $lxchostname --state RUNNING
+sleep 2 # wait for sshd to start in lxc
+$BIN_DIR/guest-login $lxchostname

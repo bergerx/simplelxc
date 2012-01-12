@@ -6,7 +6,7 @@ set -e
 . /etc/simplelxc
 
 # by dependencies
-aptitude install -y lxc bridge-utils debootstrap iptables iproute
+aptitude install -y lxc bridge-utils debootstrap iptables iproute apt-cacher-ng
 
 # if there is no cgroup mounted
 if ! grep " cgroup " /proc/mounts &>/dev/null; then
