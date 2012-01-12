@@ -2,6 +2,11 @@
 name=$1
 . /etc/simplelxc
 vi $LXCS_DIR/$name/config
-# TODO: check if lxc is running first
-echo "You must restart the server if it running, you can do i t by typing this:"
-echo ">>> 'sudo simplelxc restart $name'"
+
+# check if lxc is running first
+isRunning=$(/usr/bin/lxc-info -n $name | cut -d ' ' -f 3)
+
+if [ "$isRunning" == "RUNNING" ]; then
+	echo "You must restart the server if it running, you can do it by typing this:"
+	echo ">>> 'sudo simplelxc restart $name'"
+fi
