@@ -1,3 +1,4 @@
+* IP parameter must not be mandatory for guest-create, sl should automatically assign one if not given
 * Add help messages for each script, just hitting enter without parameters must show what to do
 * Add parameter checks for every script
 * Add log for each action taken
