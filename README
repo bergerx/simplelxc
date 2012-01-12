@@ -20,6 +20,8 @@ simplelxc [guest] pack <guest_name>
 simplelxc [guest] unpack <file_name>
 
 # Template operations, typically you dont need to run these manually
+# Template's are root file systems with hostname as hostaname-<templatename> and ip address ad 127.0.0.2,
+# when creating a guest we just replace this two with original values of the guest system.
 simplelxc template list
 simplelxc template create [<template_name> [<debian_release_name>]]
 simplelxc template copy <template_name> <template_name>
@@ -30,12 +32,12 @@ simplelxc template destroy <template_name>
 simplelxc host prepare
 simplelxc host check
 
-# Current installation procedure
+# Current installation procedure, normally a script or package should do this
 sudo aptitude install lxc bridge-utils debootstrap iptables iproute apt-cacher-ng
 sudo cp config /etc/simplelxc
 sudo mkdir /usr/lib/simplelxc
 sudo cp guest-* template-* host-*
-sudo sed 's!.*BIN_DIR.*!/usr/lib/simplelxc!g'  # editing "BIN_DIR" parameter is enough
+sudo sed 's!.*BIN_DIR.*!BIN_DIR=/usr/lib/simplelxc!g'  # editing "BIN_DIR" parameter is enough
 sudo cp _simplelxc /etc/bash_completion.d/simplelxc
 
 # try these
