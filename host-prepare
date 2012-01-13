@@ -40,7 +40,7 @@ fi
 
 if ! iptables -L -t nat | grep $NETWORK &>/dev/null; then
 	out_interface=$(ip route ls | grep ^default | sed 's/.* dev \([^ ]\+\)/\1/g')
-	iptables -t nat -s $NETWORK/24 -A POSTROUTING -o wlan0 -j MASQUERADE
+	iptables -t nat -s $NETWORK/24 -A POSTROUTING -o $out_interface -j MASQUERADE
 	iptables-save > /etc/iptables.up.rules
 	cat<<-EOF > /etc/network/if-pre-up.d/iptables
 	#!/bin/bash
