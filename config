@@ -1,9 +1,8 @@
-#!/bin/bash
 BRIDGE_INTERFACE=slxc_br
 NETWORK=192.168.172.0
 NETMASK=255.255.255.0
 HOST_IP=192.168.172.1
-BIN_DIR=/home/bekir/repos/simplelxc
+BIN_DIR=/usr/lib/simplelxc
 TEMPLATES_DIR=/var/lib/simplelxc/templates
 DEBOOTSTRAPS_DIR=/var/lib/simplelxc/debootstraps
 LXCS_DIR=/var/lib/lxc

@@ -1,0 +1,4 @@
+guest-* usr/lib/simplelxc
+template-* usr/lib/simplelxc
+host-* usr/lib/simplelxc
+simplelxc usr/bin
