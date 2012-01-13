@@ -1,5 +1,6 @@
 #!/bin/bash
 name=$1
+# TODO: check if $name is an lxc name
 . /etc/simplelxc
 vi $LXCS_DIR/$name/config
 

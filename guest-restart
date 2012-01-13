@@ -1,4 +1,6 @@
 #!/bin/bash
 name=$1
+# TODO: check if a guest with that name exists and already running; if stopped,
+#       then show a warning and start
 lxc-stop -n $name
 lxc-start -n $name -d

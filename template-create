@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
-. /etc/simplelxc
 name=${1:-$DEFAULT_TEMPLATE}
 release=${2:-$DEFAULT_TEMPLATE}
+
+# TODO: check name does not exists
+# TODO: check is releasename is valid
+
+. /etc/simplelxc
 
 export LANGUAGE=C
 export LC_ALL=C

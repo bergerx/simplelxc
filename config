@@ -7,4 +7,4 @@ BIN_DIR=/home/bekir/repos/simplelxc
 TEMPLATES_DIR=/var/lib/simplelxc/templates
 DEBOOTSTRAPS_DIR=/var/lib/simplelxc/debootstraps
 LXCS_DIR=/var/lib/lxc
-DEFAULT_TEMPLATE=squeeze
+DEFAULT_TEMPLATE=wheezy

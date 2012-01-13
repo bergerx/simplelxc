@@ -1,5 +1,6 @@
 #!/bin/bash
 name=$1
+# TODO: check if there is an existing lxc and it is in running state
 . /etc/simplelxc
 ip=$(cat $LXCS_DIR/$name/rootfs/etc/hosts | awk "/$name/ {print \$1}")
 ssh -o StrictHostKeyChecking=no -i /etc/ssh/ssh_host_rsa_key root@$ip

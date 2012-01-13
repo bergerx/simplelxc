@@ -1,3 +1,4 @@
 #!/bin/bash
 . /etc/simplelxc
+# TODO: dont list anything in that directory, maybe "grep -l template- $TEMPLATES_DIR/*/etc/hostname"
 ls $TEMPLATES_DIR/

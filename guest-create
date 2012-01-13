@@ -35,9 +35,15 @@ if [[ "$EUID" -ne 0 ]]; then
 	show_error "You must be root to run this script. (Hint: use sudo)"
 fi
 
+# TODO: first parameter is hostname but second parameter could be an ip address
+#       or a template name, check if it is a valid ip or else search a template
+#       with that name, this is a bit tricky but most simple way for users
 lxchostname=${1:-undefined}
 ipaddr=${2:-undefined}
 template_name=${3:-$DEFAULT_TEMPLATE}
+
+# TODO: assign an empty ip address from network, must not be assigned to any
+#       where and must not be used by any closed guest's.
 
 template_dir=$TEMPLATES_DIR/$template_name
 

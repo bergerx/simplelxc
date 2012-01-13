@@ -1,4 +1,7 @@
 #!/bin/bash
 name=$1
+# TODO: check if $name is an lxc name
 . /etc/simplelxc
+# TODO: show a warning about "debian runs any installed servise immediately,
+#       don't install services in chroot"
 chroot $LXCS_DIR/$name/rootfs

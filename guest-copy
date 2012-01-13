@@ -2,6 +2,9 @@
 from=$1
 to=$2
 ip=$4
+# TODO: check if $from is an existing lxc name
+# TODO: check if an lxc with name $to not exists
+# TODO: check if given ip address in use either by an other host or a stopped guest
 . /etc/simplelxc
 
 oldip=$(cat $LXCS_DIR/$from/rootfs/etc/hosts | awk "/$from/ {print \$1}")

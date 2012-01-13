@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# TODO: we should move this kind of functions to a file wich we import that file where needed
 function show_error {
 	echo -e "${0##*/}: \E[31m$1" >&2
 	tput sgr0 >&2
@@ -15,7 +16,7 @@ fi
 . /etc/simplelxc
 
 # check dependencies
-if dpkg -l lxc bridge-utils debootstrap iptables iproute | grep "No packages found" &>/dev/null; then
+if dpkg -l lxc bridge-utils debootstrap iptables iproute apt-cacher-ng | grep "No packages found" &>/dev/null; then
 	show_error "Dependencies failed"
 	exit 2 
 fi

@@ -1,3 +1,4 @@
 #!/bin/bash
 name=$1
+# TODO: check if guest is existing and running, else show warning
 lxc-stop -n $name

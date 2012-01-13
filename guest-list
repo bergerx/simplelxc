@@ -1,3 +1,5 @@
 #!/bin/bash
+# TODO: we should show current state of guest (RUNNING, STOPPED, etc.) and ip
+#       address
 . /etc/simplelxc
 ls $LXCS_DIR/*/config 2>/dev/null | cut -d'/' -f'5'

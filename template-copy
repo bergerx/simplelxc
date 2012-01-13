@@ -1,7 +1,10 @@
 #!/bin/bash
 from=$1
 to=$2
+# TODO: check if $from exists and $to does not
 . /etc/simplelxc
 
 cp -rap $TEMPLATES_DIR/$from $TEMPLATES_DIR/$to
+# TODO: we should be more strict about templates, may be we should just look
+#       how openvz handle this
 sed -i "s/template-$from/template-$to/g" $(grep -rl "template-$from" $TEMPLATES_DIR/$to/etc/ 2>/dev/null)
