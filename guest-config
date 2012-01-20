@@ -1,13 +1,21 @@
 #!/bin/bash
-name=$1
-# TODO: check if $name is an lxc name
+set -e
 . /etc/simplelxc
-vi $LXCS_DIR/$name/config
+. $BIN_DIR/functions
 
-# check if lxc is running first
-isRunning=$(/usr/bin/lxc-info -n $name | cut -d ' ' -f 3)
+name=$1
 
-if [ "$isRunning" == "RUNNING" ]; then
-	echo "You must restart the server if it running, you can do it by typing this:"
-	echo ">>> 'sudo simplelxc restart $name'"
+if ! is_guest "$name"; then
+	color_echo RED "There is no guest named '$name'"
+	echo "You can see a list of existing guests by:
+>>> $(get_sl_command) list $name"
+	exit 1
+fi
+
+editor $LXCS_DIR/$name/config
+
+if is_guest_running "$name"; then
+	# TODO: we should change guest properties on the fly
+	echo "You must restart the server if it is running, you can do it by:
+>>> $(get_sl_command) restart $name"
 fi

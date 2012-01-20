@@ -1,7 +1,25 @@
 #!/bin/bash
+set -e
+. /etc/simplelxc
+. $BIN_DIR/functions
+
 name=$1
-# TODO: check is given name is an existing lxc guest
-lxc-stop -n $name
+
+if ! is_guest $name; then
+	color_echo RED "There is no guest named '$name'"
+	echo "You can see a list of existing guests by:
+>>> $(get_sl_command) list"
+	exit 1
+fi
+
+if is_guest_running $name; then
+	color_echo YELLOW "Stopping guest '$name' before destroying ..."
+	lxc-stop --name $name
+fi
+
+lxc-destroy -n $name
 rm -f $config /etc/lxc/$name.conf
 rm -f $config /etc/lxc/auto/$name.conf
-lxc-destroy -n $name
+rm -rf --preserve-root $LXCS_DIR/$name
+
+color_echo GREEN "Destroyed guest '$name'"

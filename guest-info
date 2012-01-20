@@ -1,3 +1,18 @@
 #!/bin/bash
+set -e
+. /etc/simplelxc
+. $BIN_DIR/functions
+
 name=$1
-lxc-info -n $name
+
+if ! is_guest $name; then
+	color_echo RED "There is no guest named '$name'"
+	echo "You can see a list of existing guests by:
+>>> $(get_sl_command) list"
+	exit 1
+fi
+
+echo "state: $(get_guest_state $name)"
+echo "ip: $(get_guest_ip $name)"
+echo "root: $LXCS_DIR/$name/rootfs/"
+echo "config: $LXCS_DIR/$name/config"

@@ -1,17 +1,84 @@
 #!/bin/bash
-from=$1
-to=$2
-ip=$4
-# TODO: check if $from is an existing lxc name
-# TODO: check if an lxc with name $to not exists
-# TODO: check if given ip address in use either by an other host or a stopped guest
+set -e
 . /etc/simplelxc
+. $BIN_DIR/functions
 
-oldip=$(cat $LXCS_DIR/$from/rootfs/etc/hosts | awk "/$from/ {print \$1}")
+from=${1:-undefined}
+to=${2:-undefined}
+ip=${3:-undefined}
 
+# TODO: we must handle err and int signals like guest create
+
+function usage (){
+	# TODO: fill-in usage
+	echo -n ''
+}
+
+if [ "$from" == "undefined" ]; then
+	color_echo RED "You must supply an exiting guest name to copy."
+	usage
+	echo "You can see a list of existing guests by:
+>>> $(get_sl_command) list"
+fi
+
+if ! is_guest "$from"; then
+	color_echo RED "Given source guest '$from' is not exists."
+	usage
+	exit 1
+fi
+
+if [ "$to" == "undefined" ]; then
+	color_echo RED "You must supply a new guest name to create"
+	usage
+	exit 1
+fi
+
+if is_guest "$to"; then
+	color_echo RED "Given target guest name '$to' is already exists."
+	usage
+	exit 1
+fi
+
+if is_guest_running "$from"; then
+	echo "
+      Be careful, if you are not sure what you are doing you should
+      stop the source guest before starting to copy:
+      >>> $(get_sl_command) stop $from
+      >>> $(get_sl_command) copy $from to
+      >>> $(get_sl_command) start $from
+"
+	if ! yesno "Do you still want to continue (Yes|[No])? " n; then
+		exit 1
+	fi
+fi
+
+
+if check_ping "$ip"; then
+	# TODO: check if given ip address in use either by an other host or a stopped guest
+	echo -n ''
+fi
+
+if [ "$ip" == "undefined" ]; then
+	ip=$(get_next_suitible_ip)
+	color_echo YELLOW "No ip address is given, using next suitible address '$ip'"
+fi
+
+oldip=$(get_guest_ip "$from")
+
+echo "Starting to copy guest, this may take a while. '$from'->'$to' ..."
 cp -rap $LXCS_DIR/$from $LXCS_DIR/$to
-rootfs=$LXCS_DIR/$to/rootfs
-sed -i "s/$from/$to/g" $(grep -rl "$from" $rootfs/etc/ 2>/dev/null)
-sed -i "s/$oldip/$ip/g" $(grep -rl "$oldip" $rootfs/etc/ 2>/dev/null)
 
-lxc-start -d -n $to
+echo "Configuring new guest '$to'..."
+rootfs=$LXCS_DIR/$to/rootfs
+config=$LXCS_DIR/$to/config
+sed -i "s/\([^-a-zA-Z0-9_]\|^\)$from\([^-a-zA-Z0-9_]\|\$\)/\1$to\2/g" $(grep -rl "$from" $rootfs/etc/ $config 2>/dev/null)
+sed -i "s/veth-${from::10}/veth-${to::10}/g" $config
+sed -i "s/\([^0-9]\|^\)$oldip\([^0-9]\|\$\)/\1$ip\2/g" $(egrep -rl "([^0-9]|^)$oldip([^0-9]|$)" $rootfs/etc/ $config 2>/dev/null)
+
+mac=$(printf "02:00:%02x:%02x:%02x:%02x" ${ip//./ })
+sed -i "/^lxc.network.hwaddr/s/.*/lxc.network.hwaddr = $mac/g" $LXCS_DIR/$to/config
+
+color_echo GREEN "Created guest '$to'"
+
+# start guest immediately
+$BIN_DIR/guest-start "$to"

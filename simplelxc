@@ -1,17 +1,81 @@
 #!/bin/bash
 . /etc/simplelxc
+. $BIN_DIR/functions
+
+function usage() {
+	cat <<EOF
+Usage: $(get_sl_command) <command> [<args>]
+       $(get_sl_command) template <command> [<args>]
+
+  Available commands and their arguments:
+    list
+    create <guest_name> [<ip>] [<template_name>]
+    copy <guest_name> <guest_name> [<ip>]
+    login <guest_name> # logs in as root
+    start|stop|restart <guest_name>
+    destroy <guest_name>
+    info <guest_name>
+    pack <guest_name>
+    unpack <file_name>
+
+  Available commands for templates:
+    list
+    create [<template_name> [<debian_release_name>]]
+    copy <template_name> <template_name>
+    chroot <template_name>
+    destroy <template_name>
+
+Most general scenario:
+    $(get_sl_command) create test1
+    $(get_sl_command) login test1
+
+EOF
+}
+
+if [[ "$EUID" -ne 0 ]]; then
+	color_echo RED "You must be root to run this script. (Hint: try 'sudo ${0##*/} $@')"
+	exit 1
+fi
+
+if [ "$1" == "--version" ]; then
+	echo "simplelxc $(cat $BIN_DIR/VERSION)"
+	exit 0
+fi
+
+if [ "$1" == "--help" -o "$1" == "help" ]; then
+	usage
+	exit 0
+fi
 
 glist='list create copy login start stop destroy info restart config chroot'
-
-if echo $glist | grep $1 &>/dev/null; then
-	command="guest-$1"
+if echo $glist | grep "$1" &>/dev/null; then
+	object=guest
+	command=${1:-notgiven}
 	shift 1
 else
-	command="$1-$2"
+	object=$1
+	command=${2:-notgiven}
 	shift 2
 fi
 
-if ! test -f $BIN_DIR/$command; then
-	echo "Cannot find a suitable command"
+clist="guest template"
+if ! echo "$clist" | grep "$object" &>/dev/null; then
+	color_echo RED "Cant understand your request"
+	usage
+	exit 1
 fi
+
+if [ "$command" == "notgiven" ]; then
+	usage
+	exit 1
+fi
+
+command="$object-$command"
+
+if ! test -f $BIN_DIR/$command; then
+	color_echo RED "Cannot find a suitable command"
+	usage
+	exit 1
+fi
+
 exec $BIN_DIR/$command "$@"

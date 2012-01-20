@@ -12,7 +12,7 @@ _simplelxc_notrunning_lxc_list()
 {
 	local all running notrunning
 	all=$(ls /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5)
-	running=$(cd /cgroup/ && /bin/ls -d */ | tr -d "/")
+	running=$(cd /cgroup/ && /bin/ls -d */ 2>/dev/null| tr -d "/")
 	notrunning=$(echo -e "$running\n$running\n$all" | sort | uniq -u)
 	compgen -W '$notrunning' $1
 }
@@ -22,7 +22,7 @@ _simplelxc_template_list()
 	cd /var/lib/simplelxc/templates && compgen -f $1
 }
 
-_simplelxc () 
+_simplelxc ()
 {
 	local cur prev pprev glist sllist tlist hlist
 	COMPREPLY=()
@@ -89,8 +89,9 @@ _simplelxc ()
 			return 0
 			;;
 		prepare|check|list)
-		return 0
-		;;
+			COMPREPLY=()
+			return 0
+			;;
 	esac
 }
 complete -F _simplelxc simplelxc sl

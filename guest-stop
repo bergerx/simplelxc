@@ -1,4 +1,26 @@
 #!/bin/bash
+set -e
+. /etc/simplelxc
+. $BIN_DIR/functions
+
 name=$1
-# TODO: check if guest is existing and running, else show warning
-lxc-stop -n $name
+
+if ! is_guest $name; then
+	color_echo RED "There is no guest named '$name'"
+	echo "You can see a list of existing guests by:
+>>> $(get_sl_command) list"
+	exit 1
+fi
+
+if ! is_guest_running $name; then
+	color_echo RED "Guest '$name' is already stopped!"
+else
+	lxc-stop --name $name
+	color_echo GREEN "Stopped '$name' ..."
+fi
+
+echo "You can start it again by:
+>>> $(get_sl_command) start $name
+Or destroy it by:
+>>> $(get_sl_command) destroy $name"
+

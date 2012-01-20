@@ -1,18 +1,22 @@
 #!/bin/bash
 set -e
+. /etc/simplelxc
+. $BIN_DIR/functions
+
 name=${1:-$DEFAULT_TEMPLATE}
 release=${2:-$DEFAULT_TEMPLATE}
+exec 3>&1 4>&2
+
 
 # TODO: check name does not exists
 # TODO: check is releasename is valid
 
-. /etc/simplelxc
 
 export LANGUAGE=C
 export LC_ALL=C
 export LANG=C
 
-exec 3>&1 4>&2 >>/var/log/simplelxc 2>&1
+exec >>/var/log/simplelxc 2>&1
 echo "================================================================================"
 echo "$(date +%F\ %T): Running: $0 $@"
 
@@ -24,7 +28,7 @@ fi
 
 template_dir=$TEMPLATES_DIR/$name
 if test -d $template_dir; then
-	echo $template_dir zaten var
+	color_echo RED "template $template_dir is already exists"
 else
 	mkdir -p $(dirname $template_dir)
 fi
@@ -53,14 +57,15 @@ mkdir -p $template_dir/etc/ssh
 touch $template_dir/etc/ssh/sshd_not_to_be_run
 
 chroot $template_dir apt-get update
-chroot $template_dir apt-get -y install ifupdown locales libui-dialog-perl dialog netbase net-tools iproute openssh-server bsdmainutils iputils-ping sudo vim netcat-traditional
+chroot $template_dir apt-get --no-install-recommends install --assume-yes ifupdown dialog netbase net-tools iproute openssh-server bsdmainutils iputils-ping sudo vim netcat-traditional
 
 # allow ssh to be run on startup
 rm $template_dir/etc/ssh/sshd_not_to_be_run
 
-echo "en_US.UTF-8 UTF-8" > $template_dir/etc/locale.gen
-chroot $template_dir locale-gen
-chroot $template_dir update-locale LANG=en_US.UTF-8
+# removed locales package and next lines due to installation problems in wheeezy
+#echo "en_US.UTF-8 UTF-8" > $template_dir/etc/locale.gen
+#chroot $template_dir locale-gen 
+#chroot $template_dir update-locale LANG=en_US.UTF-8
 
 # localtime
 cp $template_dir/usr/share/zoneinfo/$(head -n 1 /etc/timezone) $template_dir/etc/localtime
@@ -86,4 +91,4 @@ echo "$(date +%F\ %T): Finished: $0 $@"
 echo "================================================================================"
 
 exec 1>&3 2>&4
-echo "Created template: $name"
+color_echo GREEN "Created new template: $name"

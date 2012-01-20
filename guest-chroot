@@ -1,7 +1,24 @@
 #!/bin/bash
-name=$1
-# TODO: check if $name is an lxc name
+set -e
 . /etc/simplelxc
-# TODO: show a warning about "debian runs any installed servise immediately,
-#       don't install services in chroot"
-chroot $LXCS_DIR/$name/rootfs
+. $BIN_DIR/functions
+
+name=$1
+
+if ! is_guest "$name"; then
+	color_echo RED "There is no guest: \"$name\""
+	exit 1
+fi
+
+if is_guest_running "$name"; then
+	color_echo RED "Guest \"$name\" is running."
+fi
+
+echo "
+      Be careful, if you are not sure what you are doing you should
+      use login:
+      >>> $(get_sl_command) login $name
+"
+if yesno "Do you still want to chroot (Yes|[No])? " n; then
+	chroot $LXCS_DIR/$name/rootfs
+fi

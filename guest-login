@@ -1,6 +1,22 @@
 #!/bin/bash
-name=$1
-# TODO: check if there is an existing lxc and it is in running state
+set -e
 . /etc/simplelxc
-ip=$(cat $LXCS_DIR/$name/rootfs/etc/hosts | awk "/$name/ {print \$1}")
-ssh -o StrictHostKeyChecking=no -i /etc/ssh/ssh_host_rsa_key root@$ip
+. $BIN_DIR/functions
+
+name=$1
+if ! is_guest $name; then
+	color_echo RED "There is no guest named '$name'"
+	echo "You can see a list of existing guests by:
+>>> $(get_sl_command) list"
+	exit 1
+fi
+
+if ! is_guest_running $name; then
+	color_echo RED "Guest '$name' is stopped!"
+	echo "You can start it by:
+>>> $(get_sl_command) start $name"
+	exit 1
+fi
+
+ip=$(get_guest_ip $name)
+ssh -o StrictHostKeyChecking=no -i /etc/ssh/ssh_host_rsa_key root@$ip 2>/dev/null

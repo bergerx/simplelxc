@@ -1,5 +1,8 @@
 #!/bin/bash
-# TODO: we should show current state of guest (RUNNING, STOPPED, etc.) and ip
-#       address
+set -e
 . /etc/simplelxc
-ls $LXCS_DIR/*/config 2>/dev/null | cut -d'/' -f'5'
+. $BIN_DIR/functions
+
+for guest in $(get_guest_list); do
+	printf "%-12s %-12s %-16s\n" "$guest" "$(get_guest_state $guest)" "$(get_guest_ip $guest)"
+done

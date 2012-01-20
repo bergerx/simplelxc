@@ -1,0 +1,176 @@
+#!/bin/bash
+# Ensure /etc/simplelxc is included before using any functions
+
+function check_root() {
+	[[ "$EUID" -eq 0 ]]
+	return $?
+}
+
+function get_template_list() {
+	ls -d $TEMPLATES_DIR/*/etc 2>/dev/null | sed -e "s@$TEMPLATES_DIR/@@g" -e "s@/etc@@g" | sort
+}
+
+function get_guest_list() {
+	ls $LXCS_DIR/*/config 2>/dev/null | sed -e "s@$LXCS_DIR/@@g" -e "s@/config@@g" | sort
+}
+
+
+function get_guest_state() {
+	lxc-info -s -n "$1" 2>/dev/null | awk '{print $2}'
+}
+
+function get_running_guest_list() {
+	sort <(find /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5 | sort -u) <(find /cgroup/* -maxdepth 0 -type d | sed 's@/cgroup/@@g') | uniq -d | sort
+}
+
+function get_stopped_guest_list() {
+	sort <(get_running_guest_list) <(get_running_guest_list) <(get_guest_list) | uniq -u | sort
+}
+
+function is_template() {
+	get_template_list | grep "^$1$" &>/dev/null
+	return $?
+}
+
+function is_guest() {
+	get_guest_list | grep "^$1$" &>/dev/null
+	return $?
+}
+
+function is_guest_running() {
+	get_running_guest_list | grep "^$1$" &>/dev/null
+	return $?
+}
+
+function get_guest_ip() {
+	local guest=$1
+	is_guest "$guest" || return 1
+	sed -n "/^iface eth0/,/address/p" $LXCS_DIR/$guest/rootfs/etc/network/interfaces 2>/dev/null \
+		| awk '/address/ {print $2}'
+}
+
+function get_guest_by_ip() {
+	grep -i "address.*$1$" $LXCS_DIR/*/rootfs/etc/network/interfaces 2>/dev/null\
+		| awk '{print $1}' \
+		| sed -e s@/var/lib/lxc/@@g -e 's@/rootfs/etc/network/interfaces.*@@g'
+	grep -i "address.*$1$" $LXCS_DIR/*/rootfs/etc/network/interfaces &>/dev/null
+	return $?
+}
+
+function check_ping() {
+	ping -c 2 -w 3 "$1" &>/dev/null
+	return $?
+}
+
+# copied from http://www.linuxjournal.com/content/validating-ip-address-bash-script
+function valid_ip {
+	local ip=$1
+	local OIFS
+	local stat=1
+	if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+		OIFS=$IFS
+		IFS='.'
+		ip=($ip)
+		IFS=$OIFS
+		[[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+			&& ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+		stat=$?
+	fi
+	return $stat
+}
+
+function color_echo() {
+	local word
+	for word in "$@"; do
+		case "$word" in
+			NORMAL|RESET) echo -n -e "\033[0;00m";;
+			BLACK) echo -n -e "\033[22;30m";;
+			RED|--ERROR|--ERR) echo -n -e "\033[22;31m";;
+			GREEN|--INFO) echo -n -e "\033[22;32m";;
+			YELLOW|--WARNING|--WARN) echo -n -e "\033[22;33m";;
+			BLUE) echo -n -e "\033[22;34m";;
+			MAGENTA) echo -n -e "\033[22;35m";;
+			CYAN) echo -n -e "\033[22;36m";;
+			GRAY|WHITE) echo -n -e "\033[22;37m";;
+			LGRAY|DARKGRAY|BRIGHTBLACK|--DEBUG) echo -n -e "\033[01;30m";;
+			LRED|LIGHTRED|BRIGHTRED|--FATAL) echo -n -e "\033[01;31m";;
+			LGREEN|LIGHTGREEN|BRIGHTGREEN) echo -n -e "\033[01;32m";;
+			LYELLOW|LIGHTYELLOW|BRIGHTYELLOW) echo -n -e "\033[01;33m";;
+			LBLUE|LIGHTBLUE|BRIGHTBLUE) echo -n -e "\033[01;34m";;
+			LMAGENTA|LIGHTMAGENTA|BRIGHTMAGENTA) echo -n -e "\033[01;35m";;
+			LCYAN|LIGHTCYAN|BRIGHTCYAN) echo -n -e "\033[01;36m";;
+			LWHITE|LIGHTWHITE|BRIGHTWHITE) echo -n -e "\033[01;37m";;
+			*) echo -n "$word ";;
+		esac
+	done
+	echo -e "\033[0;00m"
+}
+
+function yesno() {
+	# returns 1 if no, and 0 if no; there must be a default choice,
+	# if not given assume yes
+	local text=$1
+	local default=${2:-y}
+	local defval=1 yn
+	if [ "$default" == "y" -o "$default" == "yes" ]; then
+		defval=0
+	fi
+	while :; do
+		read -p "$text" yn
+		case $yn in
+			[Yy]*) return 0;;
+			[Nn]*) return 1;;
+			"") return $defval;;
+		esac
+	done
+}
+
+function ip_to_decimal() {
+	local a b c d
+	read a b c d < <(echo $1 | tr '.' ' ')
+	echo $(( $a*(256**3) + $b*(256**2) + $c*(256**1) + $d*(256**0) ))
+}
+
+function decimal_to_ip() {
+	echo $(($1/(256**3)%256)).$(($1/(256**2)%256)).$(($1/(256**1)%256)).$(($1/(256**0)%256))
+}
+
+function get_next_ip() {
+	local decimal=$(ip_to_decimal $1)
+	local next_decimal=$(( $decimal + 1 ))
+	decimal_to_ip $next_decimal
+}
+
+
+function get_max_ip() {
+	local grep_expr=$(echo $NETWORK | cut -d. -f1,2,3)
+	{ echo $grep_expr.2; grep "address.*$grep_expr" $LXCS_DIR/*/rootfs/etc/network/interfaces 2>/dev/null | awk '{print $3}'; } | sort -nk1,1 -nk2,2 -nk3,3 -nk4,4 | tail -n1
+}
+
+function get_next_suitible_ip() {
+	local guessed_ip
+	# TODO: assuming a /24 network is used
+	guessed_ip=$(get_max_ip)
+	while :; do
+		guessed_ip=$(get_next_ip $guessed_ip)
+		# check if guessed_ip is in use by any other machine in our network
+		if check_ping "$ipaddr"; then
+			continue
+		fi
+		# check if guessed_ip is in use by any other guest even it is stopped
+		if get_guest_by_ip $guessed_ip >/dev/null; then
+			continue
+		fi
+		break
+	done
+	echo $guessed_ip
+}
+
+function get_sl_command() {
+	# try to determine user command for help texts
+	if [ -z $SUDO_UID ]; then
+		echo -n simplelxc
+	else
+		echo -n sudo simplelxc
+	fi
+}
