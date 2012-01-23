@@ -22,5 +22,5 @@ fi
 lxc-start --name $name --daemon
 color_echo GREEN "Restarted guest '$name' ..."
 
-echo "You can login to guest '$name' by:
->>> $(get_sl_command) login $name"
+echo "You can enter to guest '$name' by:
+>>> $(get_sl_command) enter $name"

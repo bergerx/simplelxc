@@ -17,6 +17,6 @@ Description: Simply create running test LXC guests with network
  as simple as this:
    $ sudo apt-get install simplelxc
    $ sudo simplelxc create test1
-   $ sudo simplelxc login test1
+   $ sudo simplelxc enter test1
  .
- Has also create/copy/destroy/start/stop/login functions to manage LXC guests.
+ Has also create/copy/destroy/start/stop/enter functions to manage LXC guests.

@@ -24,5 +24,5 @@ else
 	color_echo GREEN "Started guest '$name'"
 fi
 
-echo "You can login to guest '$name' by:
->>> $(get_sl_command) login $name"
+echo "You can enter to guest '$name' by:
+>>> $(get_sl_command) enter $name"

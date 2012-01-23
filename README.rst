@@ -29,7 +29,7 @@ Create new lxc servers on a machine (only Debian for now) as simple as this::
 
  $ sudo apt-get install simplelxc # install
  $ sudo simplelxc create test1 # create a guest (default wheezy) and run
- $ sudo simplelxc login test1 # directly login to the guest as root
+ $ sudo simplelxc enter test1 # directly login to the guest as root
 
 Main objective is to make testing of any program easy on personal computers
 (for now it works only for Debian systems) without losing time for these:
@@ -69,19 +69,20 @@ name.
     Create a new guest from an existing guest by finding and changing IP
     address and host name to their new values.
 
-:simplelxc `login` <guest_name>:
-    Login to the guest system as root. This uses SSH to login using pre-shared
-    keys (public key of host system)
+:simplelxc `enter` <guest_name>:
+    Enter to the guest system as root. This uses SSH to login to the
+    guest lxc system using pre-shared keys (public key of host
+    system). See NOTES.
 
 :simplelxc `start` <guest_name>:
-    Start the guest. Usually you don't need to run a guest manually, they start
-    immediately after create.
+    Start the guest. Usually you don't need to run the guest manually, they
+    start immediately after create.
 
 :simplelxc `stop` <guest_name>:
-    Stop a guest.
+    Stop the guest.
 
 :simplelxc `restart` <guest_name>:
-    Restart a guest system, this is usually required after you configure guest
+    Restart the guest system, this is usually required after you configure guest
     system.
 
 :simplelxc `destroy` <guest_name>:
@@ -93,7 +94,7 @@ name.
 
 :simplelxc `chroot` <guest_name>:
     Chroot into the guest root file system, if you are not sure about what you
-    are doing you should use "login". See the notes in "`template chroot`".
+    are doing you should use "enter". See the notes in "`template chroot`".
 
 :simplelxc `info` <guest_name>:
     Show guest's IP, root file system, config file and if it is running or not.
@@ -102,29 +103,29 @@ Template actions
 ----------------
 
 Typically you don't need to run these manually. Template's are only root file
-systems with hostname as hostname-<templatename> and IP address as 127.0.0.2,
-when creating a guest we just replace this two with original values of the
+systems with hostname as hostname-<templatename> and IP address as 127.0.0.2.
+When creating a guest, we just replace this two with original values of the
 guest system.
 
 :simplelxc `template list`:
     List all available templates.
-           
+
 :simplelxc `template create` [<template_name> [<debian_release_name>]]:
     Create a new release from the given Debian release. If Debian release is
     omitted use given default template name in the simplelxc config. If
     template_name parameter is also omitted use given default template name.
-           
+
 :simplelxc `template copy` <existing_template_name> <new_template_name>:
     Create a new template from an existing template. Just copies the directory.
-           
+
 :simplelxc `template chroot` <template_name>:
     Chroot into the template, you can modify template using this action. After
     issuing this action you will be in the templates directory structure but
     there is no abstraction for processes and proc and mount not issued in this
     environment. You can return back by "exit" command. But after installing
-    any service in a chroot environment Debian immediately runs the service,
+    any service in the chroot environment Debian immediately runs the service,
     you should stop the service before exit.
-           
+
 :simplelxc `template destroy` <template_name>:
     Completely remove the template.
 
@@ -150,10 +151,10 @@ functionality, what if you don't want that package after installation.
 
 Temporary installations
 -----------------------
-For example you need a webserver with a lamp installation with phpmyadmin::
+For example you need a webserver with a LAMP installation with phpmyadmin::
 
  user@host:~$ sudo simplelxc create phpmyadmin
- user@host:~$ sudo simplelxc login phpmyadmin
+ user@host:~$ sudo simplelxc enter phpmyadmin
  root@pma:~# apt-get -y install mysql-server # give an mysql root password
  root@pma:~# apt-get -y install phpmyadmin # installs apache2, php5 and phpmyadmin, answer questions
  root@pma:~# cp /etc/phpmyadmin/apache.conf /etc/apache2/sites-available/phpmyadmin
@@ -161,7 +162,7 @@ For example you need a webserver with a lamp installation with phpmyadmin::
  root@pma:~# service apache2 reload
  root@pma:~# exit
  user@host:~$ sudo simplelxc info phpmyadmin # learn guest IP address: $guestip
- From browser login: <$guestip>/phpmyadmin
+ From browser open: http://<$guestip>/phpmyadmin
 
 Takes nearly 10 minutes if you already have a guest before (so you should have
 a template before). If that's your second guest like this, this time decreases

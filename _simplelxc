@@ -31,7 +31,7 @@ _simplelxc ()
 	pprev="${COMP_WORDS[COMP_CWORD-2]}"
 
 	sllist='guest template host'
-	glist='list create copy login start stop destroy info restart config'
+	glist='list create copy enter start stop destroy info restart config'
 	tlist='list create copy chroot destroy'
 	hlist='prepare check'
 
@@ -54,7 +54,7 @@ _simplelxc ()
 			COMPREPLY=( $(compgen -W "$hlist" $cur) )
 			return 0
 			;;
-		stop|login|restart)
+		stop|enter|restart)
 			COMPREPLY=( $(_simplelxc_running_lxc_list $cur) )
 			return 0
 			;;

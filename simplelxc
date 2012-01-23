@@ -11,7 +11,7 @@ Usage: $(get_sl_command) <command> [<args>]
     list
     create <guest_name> [<ip>] [<template_name>]
     copy <guest_name> <guest_name> [<ip>]
-    login <guest_name> # logs in as root
+    enter <guest_name> # logs in as root
     start|stop|restart <guest_name>
     destroy <guest_name>
     info <guest_name>
@@ -27,7 +27,7 @@ Usage: $(get_sl_command) <command> [<args>]
 
 Most general scenario:
     $(get_sl_command) create test1
-    $(get_sl_command) login test1
+    $(get_sl_command) enter test1
 
 EOF
 }
@@ -47,7 +47,7 @@ if [ "$1" == "--help" -o "$1" == "help" ]; then
 	exit 0
 fi
 
-glist='list create copy login start stop destroy info restart config chroot'
+glist='list create copy enter start stop destroy info restart config chroot'
 if echo $glist | grep "$1" &>/dev/null; then
 	object=guest
 	command=${1:-notgiven}

@@ -16,8 +16,8 @@ fi
 
 echo "
       Be careful, if you are not sure what you are doing you should
-      use login:
-      >>> $(get_sl_command) login $name
+      use 'enter':
+      >>> $(get_sl_command) enter $name
 "
 if yesno "Do you still want to chroot (Yes|[No])? " n; then
 	chroot $LXCS_DIR/$name/rootfs
