@@ -42,7 +42,7 @@ Main objective is to make testing of any program easy on personal computers
 Just install simplelxc, create a guest and go.
 
 Main purpose of this project is to handle only simple tasks, so if you want to
-manage a production lxc installations you should consider using plain lxc
+manage production lxc installation you should consider using plain lxc
 userspace control tool (http://lxc.sourceforge.net/) or projects like lxctl
 (http://lxc.tl/).
 
