@@ -1,5 +1,5 @@
 etc
-usr/bin
-usr/share/doc
+usr/sbin
+usr/lib/simplelxc
 var/lib/simplelxc/templates
 var/lib/simplelxc/debootstraps

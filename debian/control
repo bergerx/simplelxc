@@ -2,7 +2,7 @@ Source: simplelxc
 Section: admin
 Priority: extra
 Maintainer: Bekir Dogan <bekirdo@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), bash-completion
+Build-Depends: debhelper (>= 8.0.0), bash-completion, python-docutils
 Standards-Version: 3.9.2
 Homepage: https://github.com/bergerx/simplelxc
 Vcs-Git: git://github.com/bergerx/simplelxc.git
@@ -15,7 +15,7 @@ Depends: ${misc:Depends}, bridge-utils, debootstrap, iptables, iproute,
 Description: Simply create running test LXC guests with network
  Main objective of simplelxc is to create new lxc servers on a Debian machine
  as simple as this:
-   $ sudo aptitude install simplelxc
+   $ sudo apt-get install simplelxc
    $ sudo simplelxc create test1
    $ sudo simplelxc login test1
  .

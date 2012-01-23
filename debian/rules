@@ -16,3 +16,6 @@ override_dh_install:
 	cp config debian/simplelxc/etc/simplelxc
 	dh_install
 
+override_dh_installman:
+	rst2man README.rst debian/simplelxc.1
+	dh_installman
