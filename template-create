@@ -48,7 +48,7 @@ ln -s /proc/mounts $template_dir/etc/mtab
 
 # configure apt-cacher-ng
 echo "Acquire::http::Proxy \"http://$HOST_IP:3142/\";" > $template_dir/etc/apt/apt.conf.d/000apt-cacher-ng-proxy
-echo "deb http://ftp.debian.org/debian squeeze main contrib non-free" > $template_dir/etc/apt/sources.list
+echo "deb http://ftp.debian.org/debian $release main contrib non-free" > $template_dir/etc/apt/sources.list
 
 echo nameserver 8.8.8.8 > $template_dir/etc/resolv.conf
 
