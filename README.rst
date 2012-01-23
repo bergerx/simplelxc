@@ -171,14 +171,14 @@ because no need to re-download packages from the archives.
 NOTES
 =====
 
-``simplelxc``\(1) installs openssh-server and put the host systems key to any lxc
+`simplelxc`\(1) installs openssh-server and put the host systems key to any lxc
 guest by default. This is needed because there is no reliable way to lxc attach
 any process into the guest system.
 
 SEE ALSO
 ========
-* ``lxc``\(1)
-* ``simplelxc`` <https://github.com/bergerx/simplelxc>
+* `lxc`\(1)
+* `simplelxc` <https://github.com/bergerx/simplelxc>
 
 .. To generate a man page from this file: rst2man --strict README simplelxc.1
 .. To generate an html page from this file: rst2html --strict README README.html
