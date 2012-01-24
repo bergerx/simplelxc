@@ -5,6 +5,7 @@ _simplelxc_lxc_list()
 
 _simplelxc_running_lxc_list()
 {
+	# TODO: hard-coded cgroup file system path "/cgroup", this could be different on some systems, we must find mounted cgroup file system path first.
 	compgen -W "$(sort <(ls /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5 | sort -u) <(cd /cgroup/ && /bin/ls -d */ | tr -d "/") | uniq -d)" $1
 }
 
@@ -12,6 +13,7 @@ _simplelxc_notrunning_lxc_list()
 {
 	local all running notrunning
 	all=$(ls /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5)
+	# TODO: hard-coded cgroup file system path "/cgroup", this could be different on some systems, we must find mounted cgroup file system path first.
 	running=$(cd /cgroup/ && /bin/ls -d */ 2>/dev/null| tr -d "/")
 	notrunning=$(echo -e "$running\n$running\n$all" | sort | uniq -u)
 	compgen -W '$notrunning' $1
