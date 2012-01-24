@@ -19,6 +19,7 @@ function get_guest_state() {
 	lxc-info -s -n "$1" 2>/dev/null | awk '{print $2}'
 }
 
+# TODO: hard-coded cgroup file system path "/cgroup", this could be different on some systems, we must find mounted cgroup file system path first.
 function get_running_guest_list() {
 	sort <(find /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5 | sort -u) <(find /cgroup/* -maxdepth 0 -type d | sed 's@/cgroup/@@g') | uniq -d | sort
 }
