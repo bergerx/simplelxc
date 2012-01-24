@@ -15,7 +15,6 @@ Depends: ${misc:Depends}, bridge-utils, debootstrap, iptables, iproute,
 Description: Simply create running test LXC guests with network
  Main objective of simplelxc is to create new lxc servers on a Debian machine
  as simple as this:
-   $ sudo apt-get install simplelxc
    $ sudo simplelxc create test1
    $ sudo simplelxc enter test1
  .
