@@ -23,6 +23,7 @@ echo "$(date +%F\ %T): Running: $0 $@"
 release_dir=$DEBOOTSTRAPS_DIR/$release
 if ! test -d $release_dir; then
 	mkdir -p $(dirname $release_dir)
+	echo "Getting packages for '$release', this could take some time ..." >&3
 	debootstrap --variant=minbase $release $release_dir http://$HOST_IP:3142/ftp.debian.org/debian
 fi
 
@@ -50,19 +51,21 @@ ln -s /proc/mounts $template_dir/etc/mtab
 echo "Acquire::http::Proxy \"http://$HOST_IP:3142/\";" > $template_dir/etc/apt/apt.conf.d/000apt-cacher-ng-proxy
 echo "deb http://ftp.debian.org/debian $release main contrib non-free" > $template_dir/etc/apt/sources.list
 
+# TODO: we should find a more suitible way for this
 echo nameserver 8.8.8.8 > $template_dir/etc/resolv.conf
 
 # dont run openssh-server in chroot environment, debian automatically runs services after installing
 mkdir -p $template_dir/etc/ssh
 touch $template_dir/etc/ssh/sshd_not_to_be_run
 
+echo "Preparing template takes some time ..." >&3
 chroot $template_dir apt-get update
-chroot $template_dir apt-get --no-install-recommends install --assume-yes ifupdown dialog netbase net-tools iproute openssh-server bsdmainutils iputils-ping sudo vim netcat-traditional
+chroot $template_dir apt-get --no-install-recommends install --assume-yes ifupdown dialog netbase net-tools openssh-server
 
 # allow ssh to be run on startup
 rm $template_dir/etc/ssh/sshd_not_to_be_run
 
-# removed locales package and next lines due to installation problems in wheeezy
+# removed locales package and next lines due to installation problems in wheezy
 #echo "en_US.UTF-8 UTF-8" > $template_dir/etc/locale.gen
 #chroot $template_dir locale-gen 
 #chroot $template_dir update-locale LANG=en_US.UTF-8

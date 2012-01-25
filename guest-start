@@ -12,7 +12,7 @@ export LANG=C
 if ! is_guest $name; then
 	color_echo RED "There is no guest named '$name'"
 	echo "You can see a list of existing guests by:
->>> $(get_sl_command) list $name"
+>>> $(get_sl_command) list"
 	exit 1
 fi
 
