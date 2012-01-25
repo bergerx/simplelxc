@@ -1,3 +1,7 @@
+# TODO: auto completion needs variables but if you import functions or
+# simplelxc config file, variables in these are imported to shell
+# environment.
+
 _simplelxc_lxc_list()
 {
 	compgen -W "$(ls /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5)" $1
