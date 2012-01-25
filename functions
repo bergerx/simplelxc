@@ -12,26 +12,46 @@ function check_root() {
 	return $?
 }
 
+# Heuristic detection of gues systems created with simplelxc
+function filter_simplelxc_guests() {
+	while read guest; do
+		test -d $LXCS_DIR/$guest/rootfs \
+			&& test -f $LXCS_DIR/$guest/config \
+			&& grep $guest $LXCS_DIR/$guest/rootfs/etc/hostname &>/dev/null \
+			&& grep "iface.*eth0" $LXCS_DIR/$guest/rootfs/etc/network/interfaces &>/dev/null \
+			&& echo $guest
+	done
+}
+
 function get_template_list() {
 	ls -d $TEMPLATES_DIR/*/etc 2>/dev/null | sed -e "s@$TEMPLATES_DIR/@@g" -e "s@/etc@@g" | sort
 }
 
 function get_guest_list() {
-	ls $LXCS_DIR/*/config 2>/dev/null | sed -e "s@$LXCS_DIR/@@g" -e "s@/config@@g" | sort
+	ls $LXCS_DIR/*/config 2>/dev/null | sed -e "s@$LXCS_DIR/@@g" -e "s@/config@@g" | sort | filter_simplelxc_guests
 }
-
 
 function get_guest_state() {
-	lxc-info -s -n "$1" 2>/dev/null | awk '{print $2}'
+	# in new versions of lxc(>0.7.4) output of lxc-info is different,
+	# maybe we can get lxc state using cgroup file system
+	IFS="$IFS." read a b c < <(lxc-version | cut -d: -f2)
+	if [[ $a == 0 && ( $b > 7 || ( $b == 7 && $c > 4 ) ) ]]; then
+		lxc-info --state --name "$1" 2>/dev/null | awk '{print $2}'
+	else
+		lxc-info --name "$1" 2>/dev/null | awk '{print $3}'
+	fi
 }
 
-# TODO: hard-coded cgroup file system path "/cgroup", this could be different on some systems, we must find mounted cgroup file system path first.
+function get_cgroup_fs_path() {
+	awk '{if ($3 == "cgroup") {print $2}}' /proc/mounts
+}
+
 function get_running_guest_list() {
-	sort <(find /var/lib/lxc/*/config 2>/dev/null | cut -d'/' -f5 | sort -u) <(find /cgroup/* -maxdepth 0 -type d | sed 's@/cgroup/@@g') | uniq -d | sort
+	sort <(find $LXCS_DIR/*/config 2>/dev/null | cut -d'/' -f5 | sort -u) <(find $(get_cgroup_fs_path) -maxdepth 1 -mindepth 1 -type d | sed "s@$(get_cgroup_fs_path)/@@g") | uniq -d | sort | filter_simplelxc_guests
 }
 
 function get_stopped_guest_list() {
-	sort <(get_running_guest_list) <(get_running_guest_list) <(get_guest_list) | uniq -u | sort
+	sort <(get_running_guest_list) <(get_running_guest_list) <(get_guest_list) | uniq -u | sort | filter_simplelxc_guests
 }
 
 function is_template() {
@@ -52,14 +72,13 @@ function is_guest_running() {
 function get_guest_ip() {
 	local guest=$1
 	is_guest "$guest" || return 1
-	sed -n "/^iface eth0/,/address/p" $LXCS_DIR/$guest/rootfs/etc/network/interfaces 2>/dev/null \
-		| awk '/address/ {print $2}'
+	awk '/^iface eth0/,/address/ { if ($1 == "address") {print $2}}' $LXCS_DIR/$guest/rootfs/etc/network/interfaces 2>/dev/null
 }
 
 function get_guest_by_ip() {
 	grep -i "address.*$1$" $LXCS_DIR/*/rootfs/etc/network/interfaces 2>/dev/null\
 		| awk '{print $1}' \
-		| sed -e s@/var/lib/lxc/@@g -e 's@/rootfs/etc/network/interfaces.*@@g'
+		| sed -e "s@$LXCS_DIR@@g" -e 's@/rootfs/etc/network/interfaces.*@@g'
 	grep -i "address.*$1$" $LXCS_DIR/*/rootfs/etc/network/interfaces &>/dev/null
 	return $?
 }
