@@ -1,6 +1,12 @@
 #!/bin/bash
 # Ensure /etc/simplelxc is included before using any functions
 
+# We should debug any bash code importing this file like this
+# "sudo DEBUG=1 simplelxc start hede"
+if [ "$DEBUG" == '1' ]; then
+	set -x
+fi
+
 function check_root() {
 	[[ "$EUID" -eq 0 ]]
 	return $?
