@@ -44,8 +44,7 @@ if is_guest_running "$from"; then
       Be careful, if you are not sure what you are doing you should
       stop the source guest before starting to copy:
       >>> $(get_sl_command) stop $from
-      >>> $(get_sl_command) copy $from to
-      >>> $(get_sl_command) start $from
+      >>> $(get_sl_command) copy $from $to
 "
 	if ! yesno "Do you still want to continue (Yes|[No])? " n; then
 		exit 1
