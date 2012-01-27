@@ -42,12 +42,8 @@ function get_guest_state() {
 	fi
 }
 
-function get_cgroup_fs_path() {
-	awk '{if ($3 == "cgroup") {print $2}}' /proc/mounts
-}
-
 function get_running_guest_list() {
-	sort <(find $LXCS_DIR/*/config 2>/dev/null | cut -d'/' -f5 | sort -u) <(find $(get_cgroup_fs_path) -maxdepth 1 -mindepth 1 -type d | sed "s@$(get_cgroup_fs_path)/@@g") | uniq -d | sort | filter_simplelxc_guests
+	netstat -ax | grep "$LXCS_DIR" | sed "s#.*$LXCS_DIR/\(.*\)/command#\1#" | filter_simplelxc_guests
 }
 
 function get_stopped_guest_list() {
