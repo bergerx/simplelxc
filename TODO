@@ -2,3 +2,11 @@
 * Add help messages for each script, just hitting enter without parameters must show what to do
 * Add log for each action taken
 * Add error hadlers, trapping ERR and INT is needed, each script must clean its waste if there is some
+* Make this package run on ubuntu 11.10
+* what if openssh-server not installed, then we cant put host key into the guests because there is no host key yet
+* in some cases, ssh server in the guest system starts later, so that user could run "ssh enter" before ssh-server started, we should guide users to wait instead of doing nothing
+* More explanation in README:
+** When listing simplxc guest we use conventions, hat are they
+** users can use "sl" instead of "simplelxc" e.g. "sudo sl list"
+** we should say that we are using minbase when creating new templates
+
