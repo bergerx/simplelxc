@@ -20,8 +20,6 @@ Usage: $(get_sl_command) <command> [<args>]
     start|stop|restart <guest_name>
     destroy <guest_name>
     info <guest_name>
-    pack <guest_name>
-    unpack <file_name>
 
   Available commands for templates:
     list
