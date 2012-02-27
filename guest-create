@@ -57,7 +57,7 @@ fi
 second_param=$2
 if [ -n "$second_param" ]; then
 	if ! valid_ip "$second_param"; then
-		if [ "$second_param" == "squeeze" -o "$second_param" == "wheezy" ] || is_template "$second_param"; then
+		if [ "$second_param" == "squeeze" -o "$second_param" == "wheezy" -o "$second_param" == "sid" ] || is_template "$second_param"; then
 			template_name=$second_param
 		else
 			show_error "Given '$second_param' is not an IP address nor a template."
@@ -94,7 +94,7 @@ if ! $BIN_DIR/host-check &>/dev/null; then
 	$BIN_DIR/host-prepare
 fi
 
-if [ "$template_name" == "squeeze" -o "$template_name" == "wheezy" ]; then
+if [ "$template_name" == "squeeze" -o "$template_name" == "wheezy" -o "$template_name" == "sid" ]; then
 	if ! is_template "$template_name"; then
 		color_echo YELLOW "Creating new template '$template_name'"
 		$BIN_DIR/template-create "$template_name" "$template_name"
