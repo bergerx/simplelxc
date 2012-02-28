@@ -12,7 +12,7 @@ Package: simplelxc
 Architecture: all
 Depends: ${misc:Depends}, bridge-utils, debootstrap, iptables, iproute,
  apt-cacher-ng, bind9-host, lxc, iputils-ping
-Description: Simply create running test LXC guests with network
+Description: Simply create running test LXC guests with network enabled
  Main objective of simplelxc is to create new lxc servers on a Debian machine
  as simple as this:
    $ sudo simplelxc create test1
